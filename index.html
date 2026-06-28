@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luxemburg Bestelling</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f5f4f0; --surface: #ffffff; --border: #e2e0d8; --border-strong: #c8c5bb;
+    --text: #1a1917; --text-muted: #6b6960; --text-faint: #a09d95;
+    --accent: #7c3aed; --accent-light: #f3eeff; --accent-text: #4c1d95;
+    --amber: #b45309; --amber-light: #fef3c7; --amber-text: #78350f;
+    --blue: #1d4ed8; --blue-light: #eff6ff; --blue-text: #1e3a8a;
+    --pink: #be185d; --pink-light: #fdf2f8; --pink-text: #831843;
+    --red: #dc2626; --red-light: #fee2e2;
+    --radius: 10px; --radius-sm: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; line-height: 1.5; }
+  header { background: var(--accent); color: #fff; padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+  header h1 { font-size: 17px; font-weight: 600; }
+  header .sub { font-size: 12px; opacity: 0.75; margin-top: 1px; }
+  .header-user { font-size: 13px; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px; cursor: pointer; }
+  .tab-bar { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 57px; z-index: 90; overflow-x: auto; scrollbar-width: none; }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab-btn { flex: 1; min-width: 90px; padding: 12px 8px; border: none; background: transparent; font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; white-space: nowrap; }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .page { display: none; padding: 1rem; max-width: 640px; margin: 0 auto; }
+  .page.active { display: block; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem; box-shadow: var(--shadow); }
+  .card-title { font-size: 14px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: .75rem; }
+  label { font-size: 13px; color: var(--text-muted); display: block; margin-bottom: 4px; }
+  .field { margin-bottom: .75rem; }
+  input[type=text], input[type=password], input[type=number], select { width: 100%; padding: 9px 12px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); font-size: 14px; background: var(--bg); color: var(--text); outline: none; transition: border-color 0.15s; font-family: inherit; }
+  input:focus, select:focus { border-color: var(--accent); background: #fff; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--surface); font-size: 14px; font-weight: 500; cursor: pointer; color: var(--text); transition: background 0.1s, transform 0.08s; font-family: inherit; }
+  .btn:hover { background: var(--bg); }
+  .btn:active { transform: scale(0.97); }
+  .btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn.primary:hover { background: var(--accent-text); }
+  .btn.danger { background: var(--red-light); color: var(--red); border-color: #fca5a5; }
+  .btn.sm { padding: 5px 10px; font-size: 12px; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: .75rem; }
+
+  /* Login scherm */
+  .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+  .login-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; max-width: 360px; width: 100%; box-shadow: var(--shadow); text-align: center; }
+  .login-box .logo { font-size: 40px; margin-bottom: .5rem; }
+  .login-box h2 { font-size: 20px; font-weight: 600; margin-bottom: .25rem; }
+  .login-box p { font-size: 14px; color: var(--text-muted); margin-bottom: 1.5rem; }
+  .login-box .field { text-align: left; }
+
+  /* Categorie badges */
+  .cat-badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 20px; text-transform: uppercase; }
+  .cat-sigaret { background: var(--amber-light); color: var(--amber-text); }
+  .cat-alcohol { background: var(--blue-light); color: var(--blue-text); }
+  .cat-parfum { background: var(--pink-light); color: var(--pink-text); }
+
+  /* Sigaretten tabel */
+  .sig-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .sig-table th { text-align: left; font-size: 11px; font-weight: 600; color: var(--text-faint); text-transform: uppercase; padding: 6px 4px; border-bottom: 1px solid var(--border); }
+  .sig-table td { padding: 8px 4px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .sig-table tr:last-child td { border-bottom: none; }
+  .sig-table input[type=number] { width: 60px; padding: 5px 8px; text-align: center; }
+  .sig-table select { padding: 5px 8px; font-size: 13px; }
+
+  /* Alcohol / parfum vrije invoer */
+  .free-row { display: grid; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--border); align-items: end; }
+  .free-row:last-child { border-bottom: none; }
+  .free-row.alcohol-row { grid-template-columns: 2fr 1fr 1fr 1fr auto; }
+  .free-row.parfum-row { grid-template-columns: 2fr 1fr 1fr auto; }
+  .free-row input, .free-row select { font-size: 13px; padding: 6px 8px; }
+  .free-row label { font-size: 11px; margin-bottom: 2px; }
+
+  /* Overzicht */
+  .order-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: .75rem; box-shadow: var(--shadow); }
+  .order-card.mine { border-color: var(--accent); }
+  .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem; }
+  .order-person { font-weight: 600; font-size: 15px; }
+  .order-date { font-size: 12px; color: var(--text-faint); }
+  .order-item { display: flex; justify-content: space-between; font-size: 13px; padding: 3px 0; color: var(--text-muted); }
+  .order-actions { display: flex; gap: 6px; margin-top: .75rem; padding-top: .75rem; border-top: 1px solid var(--border); }
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.25rem; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: .75rem; text-align: center; box-shadow: var(--shadow); }
+  .stat-val { font-size: 22px; font-weight: 700; color: var(--accent); }
+  .stat-lbl { font-size: 11px; color: var(--text-faint); margin-top: 2px; text-transform: uppercase; }
+  .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+  .badge.open { background: var(--accent-light); color: var(--accent-text); }
+  .badge.closed { background: #f1f0ec; color: var(--text-faint); }
+  .trip-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .trip-row:last-child { border-bottom: none; }
+  .trip-info { flex: 1; }
+  .trip-name { font-weight: 600; font-size: 14px; }
+  .trip-meta { font-size: 12px; color: var(--text-faint); margin-top: 2px; }
+  .user-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .user-row:last-child { border-bottom: none; }
+  .empty-state { text-align: center; padding: 2.5rem 1rem; color: var(--text-faint); }
+  .empty-state .icon { font-size: 36px; margin-bottom: .5rem; }
+  .alert { padding: .75rem 1rem; border-radius: var(--radius-sm); font-size: 14px; margin-bottom: .75rem; display: none; }
+  .alert.show { display: block; }
+  .alert.success { background: var(--accent-light); color: var(--accent-text); border: 1px solid #c4b5fd; }
+  .alert.info { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+  .alert.warning { background: var(--amber-light); color: var(--amber-text); border: 1px solid #fde68a; }
+  .alert.error { background: var(--red-light); color: var(--red); border: 1px solid #fca5a5; }
+  .summary-list { list-style: none; }
+  .summary-list li { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .summary-list li:last-child { border-bottom: none; }
+  .section-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem; }
+  .section-head h2 { font-size: 16px; font-weight: 600; }
+  select { appearance: auto; }
+
+  /* Edit overlay */
+  .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; overflow-y: auto; padding: 1rem; }
+  .overlay-box { background: var(--surface); border-radius: var(--radius); max-width: 640px; margin: 2rem auto; padding: 1.25rem; }
+
+  @media (max-width: 500px) {
+    .free-row.alcohol-row { grid-template-columns: 1fr 1fr; }
+    .free-row.parfum-row { grid-template-columns: 1fr 1fr; }
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCHERM -->
+<div id="login-screen">
+  <div class="login-wrap">
+    <div class="login-box">
+      <div class="logo">🇱🇺</div>
+      <h2>Luxemburg Bestelling</h2>
+      <p>Meld aan met je naam en wachtwoord</p>
+      <div class="field"><label>Naam</label><input type="text" id="login-naam" placeholder="Jouw naam" autocomplete="username" /></div>
+      <div class="field"><label>Wachtwoord</label><input type="password" id="login-pw" placeholder="Wachtwoord" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()" /></div>
+      <div id="login-error" class="alert error" style="margin-top:.75rem;text-align:left"></div>
+      <button class="btn primary" onclick="doLogin()" style="width:100%;justify-content:center;margin-top:.5rem;padding:12px">Aanmelden</button>
+    </div>
+  </div>
+</div>
+
+<!-- HOOFD APP -->
+<div id="main-app" style="display:none">
+  <header>
+    <div>
+      <h1>🇱🇺 Luxemburg Bestelling</h1>
+      <div class="sub" id="header-sub">Selecteer een trip</div>
+    </div>
+    <div class="header-user" id="header-user" onclick="doLogout()">👤 — · Afmelden</div>
+  </header>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab('bestellen')">🛒 Bestellen</button>
+    <button class="tab-btn" onclick="showTab('overzicht')">📋 Overzicht</button>
+    <button class="tab-btn" id="tab-beheer-btn" onclick="showTab('beheer')" style="display:none">⚙️ Beheer</button>
+  </div>
+
+  <!-- BESTELLEN -->
+  <div id="page-bestellen" class="page active">
+    <div class="card">
+      <div class="card-title">Trip</div>
+      <div class="field">
+        <label>Actieve trip</label>
+        <select id="trip-select" onchange="onTripSelect()"></select>
+      </div>
+      <div id="trip-info" class="alert info"></div>
+      <div id="trip-closed" class="alert warning"></div>
+    </div>
+
+    <div id="order-form" style="display:none">
+      <!-- SIGARETTEN -->
+      <div class="card">
+        <div class="card-title">🚬 Sigaretten</div>
+        <input type="text" id="sig-search" placeholder="🔍 Zoek merk of verpakking..." oninput="renderSigCatalog()" style="margin-bottom:.75rem" />
+        <div id="sig-catalog-list"></div>
+        <div style="margin-top:.75rem;border-top:1px solid var(--border);padding-top:.75rem">
+          <div style="font-size:12px;color:var(--text-faint);margin-bottom:.5rem">Niet gevonden? Zelf toevoegen:</div>
+          <div id="sig-custom"></div>
+          <button class="btn sm" onclick="addSigCustom()" style="margin-top:6px">+ Rij toevoegen</button>
+        </div>
+      </div>
+
+      <!-- ALCOHOL -->
+      <div class="card">
+        <div class="card-title">🍾 Alcohol</div>
+        <input type="text" id="alc-search" placeholder="🔍 Zoek merk of soort..." oninput="renderAlcCatalog()" style="margin-bottom:.75rem" />
+        <div id="alc-catalog-list"></div>
+        <div style="margin-top:.75rem;border-top:1px solid var(--border);padding-top:.75rem">
+          <div style="font-size:12px;color:var(--text-faint);margin-bottom:.5rem">Niet gevonden? Zelf toevoegen:</div>
+          <div id="alcohol-rows"></div>
+          <button class="btn sm" onclick="addAlcoholRow()" style="margin-top:.5rem">+ Rij toevoegen</button>
+        </div>
+      </div>
+
+      <!-- PARFUM -->
+      <div class="card">
+        <div class="card-title">🌸 Parfum</div>
+        <div style="font-size:12px;color:var(--text-faint);margin-bottom:.75rem">Vul zelf in wat je wilt</div>
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:6px;margin-bottom:4px">
+          <div style="font-size:11px;color:var(--text-faint);font-weight:600;text-transform:uppercase">Merk & naam</div>
+          <div style="font-size:11px;color:var(--text-faint);font-weight:600;text-transform:uppercase">ml</div>
+          <div style="font-size:11px;color:var(--text-faint);font-weight:600;text-transform:uppercase">Aantal</div>
+          <div></div>
+        </div>
+        <div id="parfum-rows"></div>
+        <button class="btn sm" onclick="addParfumRow()" style="margin-top:.5rem">+ Rij toevoegen</button>
+      </div>
+
+      <!-- KOFFIE -->
+      <div class="card">
+        <div class="card-title">☕ Koffie</div>
+        <input type="text" id="koffie-search" placeholder="🔍 Zoek merk..." oninput="renderKoffieCatalog()" style="margin-bottom:.75rem" />
+        <div id="koffie-catalog-list"></div>
+      </div>
+
+      <!-- SIGAREN & CIGARILLO'S -->
+      <div class="card">
+        <div class="card-title">🚿 Sigaren &amp; Cigarillo's</div>
+        <input type="text" id="sigaren-search" placeholder="🔍 Zoek merk..." oninput="renderSigarenCatalog()" style="margin-bottom:.75rem" />
+        <div id="sigaren-catalog-list"></div>
+      </div>
+
+      <!-- TABAK -->
+      <div class="card">
+        <div class="card-title">🍂 Tabakpotten & Shag</div>
+        <input type="text" id="tabak-search" placeholder="🔍 Zoek merk of verpakking..." oninput="renderTabakCatalog()" style="margin-bottom:.75rem" />
+        <div id="tabak-catalog-list"></div>
+      </div>
+
+      <div id="order-alert" class="alert"></div>
+      <button class="btn primary" onclick="submitOrder()" style="width:100%;justify-content:center;padding:12px">✅ Bestelling indienen</button>
+      <div style="height:1.5rem"></div>
+    </div>
+  </div>
+
+  <!-- OVERZICHT -->
+  <div id="page-overzicht" class="page">
+    <div class="section-head">
+      <h2>Bestellingen</h2>
+      <select id="overzicht-trip-select" onchange="renderOverzicht()" style="width:auto;font-size:13px;padding:5px 8px"></select>
+    </div>
+    <div class="stat-grid" id="stats-grid"></div>
+    <div id="orders-list"></div>
+    <div id="totaal-summary"></div>
+  </div>
+
+  <!-- BEHEER -->
+  <div id="page-beheer" class="page">
+    <div id="beheer-lock" class="card" style="margin-top:2rem;max-width:320px;margin-left:auto;margin-right:auto;text-align:center">
+      <div style="font-size:32px;margin-bottom:.5rem">🔒</div>
+      <div style="font-weight:600;font-size:16px;margin-bottom:.25rem">Admin-toegang</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:1rem">Enkel voor beheerder</div>
+      <input type="password" id="admin-pw-input" placeholder="Wachtwoord" style="margin-bottom:.75rem;text-align:center" onkeydown="if(event.key==='Enter')checkAdminPw()" />
+      <div id="pw-error" style="font-size:12px;color:var(--red);margin-bottom:.5rem;display:none">Fout wachtwoord.</div>
+      <button class="btn primary" onclick="checkAdminPw()" style="width:100%;justify-content:center">Inloggen</button>
+    </div>
+    <div id="beheer-content" style="display:none">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:.5rem">
+        <button class="btn sm" onclick="adminLogout()">🔓 Uitloggen</button>
+      </div>
+
+      <h2 style="font-size:16px;font-weight:600;margin-bottom:.75rem">Trips</h2>
+      <div class="card">
+        <div class="card-title">Nieuwe trip aanmaken</div>
+        <div class="field"><label>Naam</label><input type="text" id="trip-naam" placeholder="bv. Luxemburg juni 2026" /></div>
+        <div class="field"><label>Datum</label><input type="date" id="trip-datum" /></div>
+        <div class="field"><label>Notitie (optioneel)</label><input type="text" id="trip-notitie" placeholder="bv. Via Arlon, vertrek 08u" /></div>
+        <div class="btn-row"><button class="btn primary" onclick="createTrip()">+ Trip aanmaken</button></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Bestaande trips</div>
+        <div id="trip-list-beheer"></div>
+      </div>
+
+      <h2 style="font-size:16px;font-weight:600;margin:.75rem 0">Gebruikers</h2>
+      <div class="card">
+        <div class="card-title">Gebruiker toevoegen</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end">
+          <div class="field" style="margin:0"><label>Naam</label><input type="text" id="user-naam" placeholder="Thomas" /></div>
+          <div class="field" style="margin:0"><label>Wachtwoord</label><input type="text" id="user-pw" placeholder="geheim123" /></div>
+          <button class="btn primary sm" onclick="addUser()" style="margin-bottom:1px">+ Toevoegen</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Gebruikers</div>
+        <div id="user-list"></div>
+      </div>
+
+      <h2 style="font-size:16px;font-weight:600;margin:.75rem 0">Catalogus sigaretten</h2>
+      <div class="card">
+        <div class="card-title">Merk toevoegen</div>
+        <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end">
+          <div class="field" style="margin:0"><label>Merk</label><input type="text" id="sig-merk" placeholder="bv. Marlboro" /></div>
+          <button class="btn primary sm" onclick="addSigMerk()" style="margin-bottom:1px">+ Toevoegen</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Merken &amp; prijzen per maat</div>
+        <div style="font-size:12px;color:var(--text-faint);margin-bottom:.75rem">Vul de prijs per sloef in per merk en maat. Laat leeg als niet beschikbaar.</div>
+        <div id="sig-merken-list"></div>
+      </div>
+      <div style="height:2rem"></div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT OVERLAY -->
+<div class="overlay" id="edit-overlay">
+  <div class="overlay-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+      <div style="font-weight:600;font-size:16px">✏️ Bestelling aanpassen</div>
+      <button class="btn sm" onclick="closeEdit()">✕</button>
+    </div>
+    <div class="card-title">🚬 Sigaretten</div>
+    <table class="sig-table"><thead><tr><th>Merk</th><th>Maat</th><th>Prijs/sloef</th><th>Sloefen</th></tr></thead><tbody id="edit-sig-tbody"></tbody></table>
+    <div style="margin-top:.75rem;border-top:1px solid var(--border);padding-top:.75rem">
+      <div style="font-size:12px;color:var(--text-faint);margin-bottom:.5rem">Zelf toevoegen</div>
+      <div id="edit-sig-custom"></div>
+      <button class="btn sm" onclick="addEditSigCustom()" style="margin-top:6px">+ Rij toevoegen</button>
+    </div>
+    <div class="card-title" style="margin-top:1rem">🍾 Alcohol</div>
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:6px;margin-bottom:4px">
+      <div style="font-size:11px;color:var(--text-faint);font-weight:600;text-transform:uppercase">Merk & soort</div>
+      <div style="font-size:11px;color:var(--text-faint);font-weight:600;text-transform:uppercase">Liter</div>
+      <div style="font-size:11px;color:var(--text-faint);font-weight:600;text-transform:uppercase">Aantal</div>
+      <div style="font-size:11px;color:var(--text-faint);font-weight:600;text-transform:uppercase">Soort</div>
+      <div></div>
+    </div>
+    <div id="edit-alcohol-rows"></div>
+    <button class="btn sm" onclick="addEditAlcoholRow()" style="margin-top:.5rem">+ Rij toevoegen</button>
+    <div class="card-title" style="margin-top:1rem">🌸 Parfum</div>
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:6px;margin-bottom:4px">
+      <div style="font-size:11px;color:var(--text-faint);font-weight:600;text-transform:uppercase">Merk & naam</div>
+      <div style="font-size:11px;color:var(--text-faint);font-weight:600;text-transform:uppercase">ml</div>
+      <div style="font-size:11px;color:var(--text-faint);font-weight:600;text-transform:uppercase">Aantal</div>
+      <div></div>
+    </div>
+    <div id="edit-parfum-rows"></div>
+    <button class="btn sm" onclick="addEditParfumRow()" style="margin-top:.5rem">+ Rij toevoegen</button>
+    <div class="btn-row" style="margin-top:1.25rem">
+      <button class="btn primary" onclick="saveEdit()" style="flex:1;justify-content:center">💾 Opslaan</button>
+      <button class="btn" onclick="closeEdit()">Annuleren</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, get, push, remove, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+// ⚠️ VERVANG DIT MET JOUW NIEUWE FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyAM52vfEqqBLgdWfQEo8OlHiOvu470v-RE",
+  authDomain: "luxemburg-f2539.firebaseapp.com",
+  databaseURL: "https://luxemburg-f2539-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "luxemburg-f2539",
+  storageBucket: "luxemburg-f2539.firebasestorage.app",
+  messagingSenderId: "854397671233",
+  appId: "1:854397671233:web:bcf55edd2011a7fc4c73c0"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const defaultSigMerken = [
+  'Marlboro','Marlboro Gold','Winston Blue','Winston Classic','Lucky Strike Red','Lucky Strike Blue',
+  'Camel Filters','Camel Filters Blue','L&M Red','L&M Blue','Pall Mall Red','Chesterfield Orange',
+  'JPS Red','JPS Blue','Philip Morris','Gauloises Blue','Gauloises Red','Karelia Slims',
+  'Elixyr Red','Elixyr Blue','West Red','Ducal Red','News Red'
+];
+const MATEN = []; // Maten uitgeschakeld
+
+// Standaard sigaretten met prijzen (DFS.lu, juni 2026)
+const defaultSigCatalog = [
+  // merk, verpakking, prijs
+  {naam:'Marlboro', verpakking:'10×20', prijs:77.00},
+  {naam:'Marlboro', verpakking:'8×25', prijs:76.80},
+  {naam:'Marlboro', verpakking:'8×30', prijs:89.60},
+  {naam:'Marlboro', verpakking:'5×40', prijs:65.00},
+  {naam:'Marlboro', verpakking:'6×50', prijs:99.00},
+  {naam:'Marlboro Gold', verpakking:'10×20', prijs:77.00},
+  {naam:'Marlboro Gold', verpakking:'8×25', prijs:76.80},
+  {naam:'Marlboro Gold', verpakking:'8×30', prijs:89.60},
+  {naam:'Marlboro Gold', verpakking:'5×40', prijs:65.00},
+  {naam:'Marlboro Gold', verpakking:'6×50', prijs:99.00},
+  {naam:'Winston Blue', verpakking:'10×20', prijs:65.00},
+  {naam:'Winston Blue', verpakking:'8×25', prijs:64.80},
+  {naam:'Winston Blue', verpakking:'8×30', prijs:78.40},
+  {naam:'Winston Blue', verpakking:'5×40', prijs:63.00},
+  {naam:'Winston Classic', verpakking:'10×20', prijs:65.00},
+  {naam:'Winston Classic', verpakking:'8×25', prijs:64.80},
+  {naam:'Winston Classic', verpakking:'8×30', prijs:78.40},
+  {naam:'Lucky Strike Red', verpakking:'10×20', prijs:68.00},
+  {naam:'Lucky Strike Red', verpakking:'8×25', prijs:65.60},
+  {naam:'Lucky Strike Red', verpakking:'8×30', prijs:76.80},
+  {naam:'Lucky Strike Red', verpakking:'5×40', prijs:61.00},
+  {naam:'Lucky Strike Red', verpakking:'6×50', prijs:90.00},
+  {naam:'Lucky Strike Blue', verpakking:'10×20', prijs:65.00},
+  {naam:'Lucky Strike Blue', verpakking:'8×25', prijs:65.60},
+  {naam:'Camel Filters', verpakking:'10×20', prijs:71.00},
+  {naam:'Camel Filters', verpakking:'8×25', prijs:70.40},
+  {naam:'Camel Filters', verpakking:'8×30', prijs:84.00},
+  {naam:'Camel Filters', verpakking:'5×40', prijs:65.00},
+  {naam:'Camel Filters Blue', verpakking:'10×20', prijs:71.00},
+  {naam:'Camel Filters Blue', verpakking:'8×25', prijs:70.40},
+  {naam:"L&M Red", verpakking:'10×20', prijs:67.00},
+  {naam:"L&M Red", verpakking:'8×25', prijs:66.40},
+  {naam:"L&M Red", verpakking:'8×30', prijs:80.00},
+  {naam:"L&M Red", verpakking:'5×40', prijs:60.00},
+  {naam:"L&M Blue", verpakking:'10×20', prijs:67.00},
+  {naam:"L&M Blue", verpakking:'8×25', prijs:66.40},
+  {naam:'Pall Mall Red', verpakking:'10×20', prijs:62.00},
+  {naam:'Pall Mall Red', verpakking:'8×25', prijs:60.80},
+  {naam:'Pall Mall Red', verpakking:'8×30', prijs:67.20},
+  {naam:'Pall Mall Red', verpakking:'5×40', prijs:57.00},
+  {naam:'Pall Mall Red', verpakking:'6×50', prijs:82.80},
+  {naam:'Chesterfield Orange', verpakking:'10×20', prijs:67.00},
+  {naam:'Chesterfield Orange', verpakking:'8×25', prijs:63.20},
+  {naam:'Chesterfield Blue', verpakking:'8×25', prijs:63.20},
+  {naam:'JPS Red', verpakking:'10×20', prijs:62.00},
+  {naam:'JPS Red', verpakking:'8×25', prijs:59.20},
+  {naam:'JPS Red', verpakking:'6×50', prijs:84.00},
+  {naam:'JPS Blue', verpakking:'10×20', prijs:62.00},
+  {naam:'JPS Blue', verpakking:'8×25', prijs:59.20},
+  {naam:'Philip Morris', verpakking:'10×20', prijs:65.00},
+  {naam:'Philip Morris', verpakking:'5×40', prijs:63.00},
+  {naam:'Gauloises Blue', verpakking:'10×20', prijs:67.00},
+  {naam:'Gauloises Blue', verpakking:'8×25', prijs:66.40},
+  {naam:'Gauloises Red', verpakking:'10×20', prijs:67.00},
+  {naam:'Karelia Slims', verpakking:'10×20', prijs:55.00},
+  {naam:'Elixyr Red', verpakking:'10×20', prijs:61.00},
+  {naam:'Elixyr Red', verpakking:'8×25', prijs:57.60},
+  {naam:'Elixyr Blue', verpakking:'10×20', prijs:61.00},
+  {naam:'West Red', verpakking:'10×20', prijs:60.00},
+  {naam:'West Red', verpakking:'8×25', prijs:56.00},
+  {naam:'West Red', verpakking:'6×50', prijs:82.80},
+  {naam:'Ducal Red', verpakking:'8×25', prijs:56.80},
+  {naam:'News Red', verpakking:'10×20', prijs:62.00},
+  {naam:'News Red', verpakking:'8×25', prijs:60.80},
+];
+
+// Koffie catalogus (DFS.lu, juni 2026)
+const defaultKoffieCatalog = [
+  {naam:'Dallmayr Classic', verpakking:'500g', prijs:5.69},
+  {naam:'Dallmayr Prodomo', verpakking:'500g', prijs:6.59},
+  {naam:'Jacobs Auslese Klassisch', verpakking:'500g', prijs:4.39},
+  {naam:'Jacobs Krönung', verpakking:'500g', prijs:5.99},
+  {naam:'Melitta Auslese Klassisch', verpakking:'500g', prijs:4.99},
+  {naam:'Melitta Auslese Mild', verpakking:'500g', prijs:5.39},
+  {naam:'Melitta Barista', verpakking:'500g', prijs:5.99},
+  {naam:'Melitta Bistro Vollmundig', verpakking:'500g', prijs:4.49},
+  {naam:'Melitta Bistrot Kräftig', verpakking:'500g', prijs:4.49},
+  {naam:'Melitta Bistrot Mild', verpakking:'500g', prijs:4.49},
+  {naam:'Melitta Harmonie Entkoffeiniert', verpakking:'500g', prijs:5.39},
+  {naam:'Melitta Kaffee Des Jahres', verpakking:'500g', prijs:5.39},
+];
+
+// Sigaren & cigarillo's catalogus (GSS.lu, juni 2026)
+const defaultSigarenCatalog = [
+  {naam:'Agio Meharis Ecuador', verpakking:'20 stuks', prijs:10.10},
+  {naam:'Agio Meharis Java', verpakking:'20 stuks', prijs:10.10},
+  {naam:'Agio Meharis Sweet Orient', verpakking:'20 stuks', prijs:9.70},
+  {naam:'Al Capone Duo Filter', verpakking:'18 stuks', prijs:5.30},
+  {naam:'Al Capone Pockets Flame Filter', verpakking:'18 stuks', prijs:5.50},
+  {naam:'Al Capone Pockets Original Filter', verpakking:'18 stuks', prijs:5.30},
+  {naam:'Clubmaster Mini Filter', verpakking:'20 stuks', prijs:6.80},
+  {naam:'Clubmaster Superior Vanilla Filter', verpakking:'20 stuks', prijs:7.30},
+  {naam:'Clubmaster Superior Vanilla Mini', verpakking:'20 stuks', prijs:6.80},
+  {naam:'Cortes Amigos Original', verpakking:'50 stuks', prijs:19.00},
+  {naam:'Cortes Classic', verpakking:'25 stuks', prijs:27.00},
+  {naam:'Cortes Club', verpakking:'25 stuks', prijs:33.50},
+  {naam:'Cortes Milord', verpakking:'25 stuks', prijs:29.00},
+  {naam:'Cortes Mini', verpakking:'50 stuks', prijs:28.50},
+  {naam:'Cortes Presidency', verpakking:'25 stuks', prijs:39.50},
+  {naam:'Cortes Selection', verpakking:'20 stuks', prijs:44.00},
+  {naam:'Cubanos Cigarillos', verpakking:'50 stuks', prijs:14.00},
+  {naam:'Cubanos Half Corona', verpakking:'25 stuks', prijs:12.00},
+  {naam:'Cubanos Wilde Senoritas', verpakking:'50 stuks', prijs:16.00},
+  {naam:'Cubanos Wilde Spriet', verpakking:'50 stuks', prijs:14.70},
+  {naam:'Danneman Moods Filtre', verpakking:'20 stuks', prijs:8.10},
+  {naam:'Danneman Moods Gold Filtre', verpakking:'20 stuks', prijs:8.10},
+  {naam:'Danneman Moods Silver Filtre', verpakking:'20 stuks', prijs:7.60},
+  {naam:'Danneman Moods Sunshine Filtre', verpakking:'20 stuks', prijs:7.90},
+  {naam:'Don Tomas Bundle Robusto', verpakking:'10 stuks', prijs:28.40},
+  {naam:'Don Tomas Bundle Rothschild', verpakking:'10 stuks', prijs:26.50},
+  {naam:'Don Tomas Clasico Robusto', verpakking:'1 stuk', prijs:5.50},
+  {naam:'Don Tomas Clasico Rothschild', verpakking:'1 stuk', prijs:5.20},
+  {naam:'Don Tomas Nicaragua Robusto', verpakking:'1 stuk', prijs:6.10},
+  {naam:'Don Tomas Nicaragua Toro', verpakking:'1 stuk', prijs:6.90},
+  {naam:'El Dorado Cigarillos', verpakking:'50 stuks', prijs:14.90},
+  {naam:'El Dorado Half Corona', verpakking:'25 stuks', prijs:12.70},
+  {naam:'El Dorado Senoritas', verpakking:'50 stuks', prijs:15.70},
+  {naam:'Handelsgold Blond', verpakking:'5 stuks', prijs:1.50},
+  {naam:'Handelsgold Blue', verpakking:'5 stuks', prijs:1.50},
+  {naam:'Handelsgold Green', verpakking:'5 stuks', prijs:1.50},
+  {naam:'Handelsgold Red', verpakking:'5 stuks', prijs:1.50},
+  {naam:'Neos Mini Java', verpakking:'20 stuks', prijs:7.20},
+  {naam:'Neos Mini White Filter', verpakking:'20 stuks', prijs:6.50},
+  {naam:'Toscanello', verpakking:'5 stuks', prijs:5.80},
+  {naam:'Toscanello Bianco Raffinato', verpakking:'5 stuks', prijs:6.00},
+  {naam:'Toscanello Castano Raffinato', verpakking:'5 stuks', prijs:6.00},
+  {naam:'Toscanello Giallo', verpakking:'5 stuks', prijs:5.80},
+  {naam:'Toscanello Rosso', verpakking:'5 stuks', prijs:5.80},
+  {naam:'Toscanello Verde', verpakking:'5 stuks', prijs:5.80},
+  {naam:'Toscano Classico', verpakking:'5 stuks', prijs:8.30},
+  {naam:'Toscano Robusto', verpakking:'4 stuks', prijs:12.80},
+];
+
+// Tabak catalogus (DFS.lu, juni 2026)
+const defaultTabakCatalog = [
+  {naam:'Amber Leaf', verpakking:'10×50g', prijs:133.00},
+  {naam:'Biggelaars Tobacco Farm', verpakking:'10×50g', prijs:75.00},
+  {naam:'Camel', verpakking:'250g bucket', prijs:41.00},
+  {naam:'Camel Blue', verpakking:'250g bucket', prijs:41.00},
+  {naam:'Camel Blue', verpakking:'175g', prijs:30.00},
+  {naam:'Camel Bucket', verpakking:'400g', prijs:65.40},
+  {naam:'Camel Giga Bucket', verpakking:'650g', prijs:104.00},
+  {naam:'Cutters Choice', verpakking:'10×50g', prijs:132.00},
+  {naam:'Drum Original', verpakking:'10×50g', prijs:108.00},
+  {naam:'Drum Sky Blue', verpakking:'10×50g', prijs:108.00},
+  {naam:'Ducal Original Red', verpakking:'200g', prijs:29.00},
+  {naam:'Ducal Original Blue', verpakking:'200g', prijs:29.00},
+  {naam:'Ducal Volume Tobacco', verpakking:'250g', prijs:36.30},
+  {naam:'Ducal Volume Jumbo', verpakking:'500g', prijs:72.60},
+  {naam:'Elixyr American Blend', verpakking:'10×30g', prijs:44.00},
+  {naam:'Elixyr American Blend', verpakking:'300g', prijs:43.50},
+  {naam:'Elixyr Volume Maxx', verpakking:'250g', prijs:36.30},
+  {naam:'Elixyr Volume Maxx', verpakking:'500g', prijs:72.60},
+  {naam:'Elixyr Volume Maxx', verpakking:'800g', prijs:116.00},
+  {naam:'Fleur Du Pays Nr.1', verpakking:'10×50g', prijs:93.00},
+  {naam:'Gauloises Melange Original', verpakking:'10×50g', prijs:103.00},
+  {naam:'Golden Virginia', verpakking:'10×50g', prijs:125.00},
+  {naam:'Interval Blond', verpakking:'10×50g', prijs:77.00},
+  {naam:'Javaanse Jongens', verpakking:'8×50g', prijs:88.00},
+  {naam:'JPS Red', verpakking:'125g', prijs:18.90},
+  {naam:'JPS Volume', verpakking:'250g', prijs:38.00},
+  {naam:'JPS Volume', verpakking:'500g', prijs:76.00},
+  {naam:'JPS Volume', verpakking:'650g', prijs:98.00},
+  {naam:'JPS', verpakking:'8×60g', prijs:96.00},
+  {naam:'L&M Original', verpakking:'250g', prijs:39.00},
+  {naam:'L&M Volume', verpakking:'125g', prijs:19.00},
+  {naam:'L&M Volume', verpakking:'250g', prijs:38.00},
+  {naam:'L&M Volume', verpakking:'500g', prijs:75.00},
+  {naam:'L&M Volume', verpakking:'650g', prijs:97.60},
+  {naam:'Look Out Holland Blue', verpakking:'10×50g', prijs:90.00},
+  {naam:'Look Out Holland Black', verpakking:'10×50g', prijs:90.00},
+  {naam:'Lucky Strike', verpakking:'10×50g', prijs:98.00},
+  {naam:'Lucky Strike Red', verpakking:'250g', prijs:39.90},
+  {naam:'Lucky Strike Volume', verpakking:'175g', prijs:27.00},
+  {naam:'Lucky Strike Volume Red', verpakking:'500g', prijs:75.00},
+  {naam:'Lucky Strike Giga Bucket', verpakking:'700g', prijs:105.00},
+  {naam:'Marlboro Red', verpakking:'300g', prijs:47.70},
+  {naam:'Marlboro Gold', verpakking:'300g', prijs:47.70},
+  {naam:'Marlboro Volume', verpakking:'125g', prijs:20.00},
+  {naam:'Marlboro Volume', verpakking:'250g', prijs:38.50},
+  {naam:'Marlboro Volume', verpakking:'500g', prijs:76.00},
+  {naam:'Marlboro Volume', verpakking:'650g', prijs:98.00},
+  {naam:'News Red Volume', verpakking:'125g', prijs:19.50},
+  {naam:'News Red Volume', verpakking:'250g', prijs:39.00},
+  {naam:'News Red Volume', verpakking:'500g', prijs:78.00},
+  {naam:'News Red Volume', verpakking:'650g', prijs:102.00},
+  {naam:'Pall Mall Red', verpakking:'10×50g', prijs:100.00},
+  {naam:'Pall Mall Red Volume', verpakking:'175g', prijs:27.00},
+  {naam:'Pall Mall Red Volume', verpakking:'700g', prijs:104.00},
+  {naam:'Pueblo Blue', verpakking:'10×30g', prijs:62.00},
+  {naam:'Pueblo Without Additives', verpakking:'10×30g', prijs:62.00},
+  {naam:'Samson', verpakking:'10×50g', prijs:110.00},
+  {naam:'Texas Blue', verpakking:'10×50g', prijs:90.00},
+  {naam:'Texas Dark', verpakking:'10×50g', prijs:90.00},
+  {naam:'Van Nelle Stevige Shag', verpakking:'10×50g', prijs:120.00},
+  {naam:'Van Nelle Zware Shag', verpakking:'10×50g', prijs:123.00},
+  {naam:'West Red', verpakking:'125g', prijs:18.00},
+  {naam:'West Red', verpakking:'175g', prijs:26.00},
+  {naam:'West Red Special Cut', verpakking:'400g', prijs:58.00},
+  {naam:'West Red XXL', verpakking:'650g', prijs:95.00},
+  {naam:'Winston Blue', verpakking:'100g', prijs:15.90},
+  {naam:'Winston Blue', verpakking:'170g', prijs:27.20},
+  {naam:'Winston Blue Bucket', verpakking:'400g', prijs:63.20},
+  {naam:'Winston Blue', verpakking:'10×50g', prijs:86.00},
+  {naam:'Winston Red', verpakking:'400g', prijs:63.20},
+  {naam:'Winston Red Bucket', verpakking:'500g', prijs:79.40},
+  {naam:'Winston Red Giga Bucket', verpakking:'650g', prijs:101.00},
+  {naam:'Winston Red', verpakking:'10×50g', prijs:86.00},
+  {naam:'Winston Volume Red', verpakking:'250g', prijs:39.50},
+  {naam:'Winston Volume Blue', verpakking:'250g', prijs:39.50},
+  {naam:'Zilver Zwaar by Drum', verpakking:'8×60g', prijs:90.40},
+];
+
+// Standaard alcohol catalogus (DFS.lu, juni 2026)
+const defaultAlcoholCatalog = {
+  Whisky: [
+    {naam:'Ballantines', verpakking:'70cl', prijs:11.95},
+    {naam:'Ballantines', verpakking:'100cl', prijs:17.65},
+    {naam:'Chivas Regal 12Y', verpakking:'70cl', prijs:22.95},
+    {naam:'Chivas Regal 18Y', verpakking:'70cl', prijs:54.95},
+    {naam:'Jack Daniels', verpakking:'70cl', prijs:16.99},
+    {naam:'Jack Daniels', verpakking:'100cl', prijs:23.99},
+    {naam:'Jack Daniels Honey', verpakking:'70cl', prijs:16.95},
+    {naam:'Jack Daniels Fire', verpakking:'70cl', prijs:16.95},
+    {naam:'Jameson', verpakking:'70cl', prijs:16.75},
+    {naam:'Jameson', verpakking:'100cl', prijs:22.95},
+    {naam:'Jim Beam', verpakking:'70cl', prijs:11.79},
+    {naam:'Johnnie Walker Red', verpakking:'70cl', prijs:10.95},
+    {naam:'Johnnie Walker Black', verpakking:'70cl', prijs:19.95},
+    {naam:'Glenfiddich 12Y', verpakking:'70cl', prijs:29.95},
+    {naam:'Label 5', verpakking:'70cl', prijs:8.95},
+    {naam:'William Lawsons', verpakking:'70cl', prijs:7.99},
+    {naam:'Grant's', verpakking:'70cl', prijs:9.95},
+  ],
+  Vodka: [
+    {naam:'Absolut', verpakking:'70cl', prijs:14.95},
+    {naam:'Absolut', verpakking:'100cl', prijs:19.95},
+    {naam:'Absolut Box 6×70cl', verpakking:'420cl', prijs:71.70},
+    {naam:'Belvedere', verpakking:'70cl', prijs:29.95},
+    {naam:'Ciroc', verpakking:'70cl', prijs:31.95},
+    {naam:'Finlandia', verpakking:'100cl', prijs:14.95},
+    {naam:'Grey Goose', verpakking:'70cl', prijs:29.95},
+    {naam:'Ketel One', verpakking:'70cl', prijs:18.95},
+    {naam:'Smirnoff', verpakking:'70cl', prijs:11.95},
+    {naam:'Smirnoff', verpakking:'100cl', prijs:15.95},
+    {naam:'Wyborowa', verpakking:'70cl', prijs:9.95},
+  ],
+  Rum: [
+    {naam:'Bacardi Carta Blanca', verpakking:'70cl', prijs:12.95},
+    {naam:'Bacardi Carta Blanca', verpakking:'100cl', prijs:16.95},
+    {naam:'Bacardi Limon', verpakking:'70cl', prijs:12.95},
+    {naam:'Captain Morgan', verpakking:'70cl', prijs:12.95},
+    {naam:'Captain Morgan', verpakking:'100cl', prijs:16.95},
+    {naam:'Diplomatico Reserva', verpakking:'70cl', prijs:29.95},
+    {naam:'Havana Club 3Y', verpakking:'70cl', prijs:13.95},
+    {naam:'Havana Club 7Y', verpakking:'70cl', prijs:19.95},
+    {naam:'Malibu', verpakking:'70cl', prijs:11.95},
+    {naam:'Plantation 3 Stars', verpakking:'70cl', prijs:17.95},
+  ],
+  Gin: [
+    {naam:'Beefeater', verpakking:'70cl', prijs:13.95},
+    {naam:'Beefeater', verpakking:'100cl', prijs:18.95},
+    {naam:'Bombay Sapphire', verpakking:'70cl', prijs:17.95},
+    {naam:'Bombay Sapphire', verpakking:'100cl', prijs:23.95},
+    {naam:'Gordon's', verpakking:'70cl', prijs:11.95},
+    {naam:'Hendrick's', verpakking:'70cl', prijs:25.95},
+    {naam:'Tanqueray', verpakking:'70cl', prijs:15.95},
+    {naam:'Tanqueray', verpakking:'100cl', prijs:21.95},
+  ],
+  Cognac: [
+    {naam:'Hennessy VS', verpakking:'70cl', prijs:29.95},
+    {naam:'Hennessy VSOP', verpakking:'70cl', prijs:44.95},
+    {naam:'Martell VS', verpakking:'70cl', prijs:27.95},
+    {naam:'Remy Martin VSOP', verpakking:'70cl', prijs:37.95},
+  ],
+  Likeur: [
+    {naam:'Amaretto Disaronno', verpakking:'70cl', prijs:16.95},
+    {naam:'Baileys', verpakking:'70cl', prijs:14.95},
+    {naam:'Baileys', verpakking:'100cl', prijs:19.95},
+    {naam:'Cointreau', verpakking:'70cl', prijs:19.95},
+    {naam:'Jägermeister', verpakking:'70cl', prijs:14.95},
+    {naam:'Kahlua', verpakking:'70cl', prijs:14.95},
+    {naam:'Passoa', verpakking:'70cl', prijs:11.95},
+    {naam:'Tia Maria', verpakking:'70cl', prijs:16.95},
+  ],
+  Wijn: [],
+  Anders: [],
+};
+const ALCOHOL_SOORTEN = ['Whisky','Vodka','Rum','Gin','Cognac','Likeur','Wijn','Bier','Anders'];
+
+let trips=[], orders=[], users=[], sigMerken=[...defaultSigMerken], sigPrijzen={};
+let currentUser=null;
+let sigCustomRows=[], alcoholRows=[], parfumRows=[];
+let editOrderKey=null, editSigCustomRows=[], editAlcoholRows=[], editParfumRows=[];
+
+const ADMIN_PW='06121991', ADMIN_KEY='lux2_admin';
+const SESSION_KEY='lux2_user';
+
+// ── Firebase laden ────────────────────────────────────────────────
+async function loadData() {
+  try {
+    const [t,o,u,s,p] = await Promise.all([
+      get(ref(db,'trips')), get(ref(db,'orders')),
+      get(ref(db,'users')), get(ref(db,'sigMerken')), get(ref(db,'sigPrijzen'))
+    ]);
+    trips   = t.exists() ? Object.entries(t.val()).map(([k,v])=>({...v,_key:k})) : [];
+    orders  = o.exists() ? Object.entries(o.val()).map(([k,v])=>({...v,_key:k})) : [];
+    users   = u.exists() ? Object.entries(u.val()).map(([k,v])=>({...v,_key:k})) : [];
+    sigMerken = s.exists() ? s.val() : [...defaultSigMerken];
+    sigPrijzen = p.exists() ? p.val() : {};
+  } catch(e) { console.error(e); }
+}
+
+onValue(ref(db,'trips'),   snap=>{ trips=snap.exists()?Object.entries(snap.val()).map(([k,v])=>({...v,_key:k})): []; renderTripSelects(); renderBeheerTrips(); renderOverzicht(); });
+onValue(ref(db,'orders'),  snap=>{ orders=snap.exists()?Object.entries(snap.val()).map(([k,v])=>({...v,_key:k})): []; renderOverzicht(); });
+onValue(ref(db,'users'),   snap=>{ users=snap.exists()?Object.entries(snap.val()).map(([k,v])=>({...v,_key:k})): []; renderUserList(); });
+onValue(ref(db,'sigMerken'),snap=>{ if(snap.exists()){ sigMerken=snap.val(); renderSigTable(); renderSigMerkenList(); } });
+onValue(ref(db,'sigPrijzen'),snap=>{ sigPrijzen=snap.exists()?snap.val():{}; renderSigTable(); renderSigMerkenList(); });
+
+// ── Login ─────────────────────────────────────────────────────────
+async function tryAutoLogin() {
+  const saved = sessionStorage.getItem(SESSION_KEY);
+  if(saved) {
+    currentUser = JSON.parse(saved);
+    showApp();
+    return;
+  }
+  await loadData();
+  // Admin via ?admin: toon wachtwoordprompt
+  if(window.location.search.includes('admin')) {
+    const pw = prompt('🔒 Admin wachtwoord:');
+    if(pw === '06121991') {
+      currentUser = { naam: 'Admin', id: 'admin' };
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+      sessionStorage.setItem(ADMIN_KEY, '1');
+      showApp();
+    } else {
+      alert('Fout wachtwoord.');
+      window.location.href = window.location.pathname;
+    }
+    return;
+  }
+  document.getElementById('login-screen').style.display='block';
+}
+
+window.doLogin = async function() {
+  const naam = document.getElementById('login-naam').value.trim();
+  const pw   = document.getElementById('login-pw').value;
+  const errEl = document.getElementById('login-error');
+  if(!naam||!pw){ showAlert(errEl,'Vul naam en wachtwoord in.','error'); return; }
+  await loadData();
+  const user = users.find(u=>u.naam.toLowerCase()===naam.toLowerCase() && u.pw===pw);
+  if(!user){ showAlert(errEl,'Naam of wachtwoord klopt niet.','error'); return; }
+  currentUser = user;
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
+  showApp();
+};
+
+function showApp() {
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('main-app').style.display='block';
+  document.getElementById('header-user').textContent=`👤 ${currentUser.naam} · Afmelden`;
+  renderAll();
+  if(sessionStorage.getItem(ADMIN_KEY)==='1') {
+    document.getElementById('tab-beheer-btn').style.display='';
+    if(window.location.search.includes('admin')) { showTab('beheer'); showAdminContent(); }
+  }
+}
+
+window.doLogout = function() {
+  sessionStorage.removeItem(SESSION_KEY);
+  sessionStorage.removeItem(ADMIN_KEY);
+  currentUser=null;
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('login-screen').style.display='block';
+  document.getElementById('login-naam').value='';
+  document.getElementById('login-pw').value='';
+};
+
+// ── Admin ─────────────────────────────────────────────────────────
+window.checkAdminPw = function() {
+  const val=document.getElementById('admin-pw-input').value;
+  if(val===ADMIN_PW){ sessionStorage.setItem(ADMIN_KEY,'1'); document.getElementById('admin-pw-input').value=''; document.getElementById('pw-error').style.display='none'; showAdminContent(); }
+  else { document.getElementById('pw-error').style.display='block'; document.getElementById('admin-pw-input').value=''; }
+};
+function showAdminContent() {
+  document.getElementById('beheer-lock').style.display='none';
+  document.getElementById('beheer-content').style.display='block';
+  document.getElementById('tab-beheer-btn').style.display='';
+  renderBeheerTrips(); renderUserList(); renderSigMerkenList();
+}
+window.adminLogout = function() {
+  sessionStorage.removeItem(ADMIN_KEY);
+  document.getElementById('beheer-lock').style.display='block';
+  document.getElementById('beheer-content').style.display='none';
+  document.getElementById('tab-beheer-btn').style.display='none';
+  showTab('bestellen');
+};
+function isAdmin(){ return sessionStorage.getItem(ADMIN_KEY)==='1'; }
+
+// ── Tabs ──────────────────────────────────────────────────────────
+window.showTab = function(name) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelector(`[onclick="showTab('${name}')"]`).classList.add('active');
+  document.getElementById('page-'+name).classList.add('active');
+  if(name==='overzicht') renderOverzicht();
+  if(name==='beheer'&&isAdmin()) showAdminContent();
+};
+
+// ── Trips ─────────────────────────────────────────────────────────
+function fmtDate(iso){ if(!iso)return''; const[y,m,d]=iso.split('-'); return`${d}/${m}/${y}`; }
+
+function renderTripSelects() {
+  ['trip-select','overzicht-trip-select'].forEach(id=>{
+    const sel=document.getElementById(id); if(!sel)return;
+    sel.innerHTML=trips.length===0?'<option value="">— nog geen trips —</option>':trips.map(t=>`<option value="${t.id}">${t.naam}${t.datum?' · '+fmtDate(t.datum):''}</option>`).join('');
+  });
+}
+
+function onTripSelect() {
+  const trip=trips.find(t=>t.id===document.getElementById('trip-select').value);
+  const infoEl=document.getElementById('trip-info'), closedEl=document.getElementById('trip-closed'), formEl=document.getElementById('order-form');
+  infoEl.classList.remove('show'); closedEl.classList.remove('show');
+  if(!trip){ formEl.style.display='none'; return; }
+  document.getElementById('header-sub').textContent=trip.naam+(trip.datum?' · '+fmtDate(trip.datum):'');
+  if(trip.notitie){ infoEl.textContent='📝 '+trip.notitie; infoEl.classList.add('show'); }
+  if(trip.status!=='open'){ closedEl.textContent='🔒 Deze trip is gesloten.'; closedEl.classList.add('show'); formEl.style.display='none'; return; }
+  formEl.style.display='block';
+  sigCustomRows=[]; alcoholRows=[]; parfumRows=[];
+  Object.keys(sigCart).forEach(k=>delete sigCart[k]);
+  Object.keys(alcCart).forEach(k=>delete alcCart[k]);
+  renderSigCatalog(); renderAlcCatalog(); renderAlcoholRows(); renderParfumRows(); renderSigCustom();
+}
+window.onTripSelect=onTripSelect;
+
+window.createTrip = async function() {
+  const naam=document.getElementById('trip-naam').value.trim();
+  const datum=document.getElementById('trip-datum').value;
+  const notitie=document.getElementById('trip-notitie').value.trim();
+  if(!naam)return;
+  const id='trip'+Date.now();
+  await set(ref(db,'trips/'+id),{id,naam,datum,notitie,status:'open'});
+  document.getElementById('trip-naam').value=''; document.getElementById('trip-datum').value=''; document.getElementById('trip-notitie').value='';
+};
+window.toggleTrip = async function(id,key) {
+  const t=trips.find(x=>x.id===id);
+  if(t) await set(ref(db,'trips/'+key+'/status'),t.status==='open'?'closed':'open');
+};
+window.deleteTrip = async function(id,key) {
+  if(!confirm('Trip verwijderen?'))return;
+  await remove(ref(db,'trips/'+key));
+  for(const o of orders.filter(o=>o.tripId===id)) await remove(ref(db,'orders/'+o._key));
+};
+
+// ── Gebruikers ────────────────────────────────────────────────────
+window.addUser = async function() {
+  const naam=document.getElementById('user-naam').value.trim();
+  const pw=document.getElementById('user-pw').value.trim();
+  if(!naam||!pw)return;
+  const id='u'+Date.now();
+  await set(ref(db,'users/'+id),{id,naam,pw});
+  document.getElementById('user-naam').value=''; document.getElementById('user-pw').value='';
+};
+window.deleteUser = async function(key) {
+  if(!confirm('Gebruiker verwijderen?'))return;
+  await remove(ref(db,'users/'+key));
+};
+function renderUserList() {
+  const el=document.getElementById('user-list'); if(!el)return;
+  if(users.length===0){el.innerHTML='<p style="font-size:13px;color:var(--text-faint)">Nog geen gebruikers.</p>';return;}
+  el.innerHTML=users.map(u=>`<div class="user-row"><span style="flex:1;font-size:14px">👤 ${u.naam}</span><span style="font-size:12px;color:var(--text-faint);margin-right:8px">🔑 ${u.pw}</span><button class="btn sm danger" onclick="deleteUser('${u._key}')">🗑</button></div>`).join('');
+}
+
+// ── Sigaretten merken ─────────────────────────────────────────────
+window.addSigMerk = async function() {
+  const merk=document.getElementById('sig-merk').value.trim();
+  if(!merk)return;
+  const nieuw=[...sigMerken,merk];
+  await set(ref(db,'sigMerken'),nieuw);
+  document.getElementById('sig-merk').value='';
+};
+window.deleteSigMerk = async function(idx) {
+  const nieuw=sigMerken.filter((_,i)=>i!==idx);
+  await set(ref(db,'sigMerken'),nieuw);
+};
+window.saveSigPrijs = async function(merk,maat,val) {
+  const prijs=parseFloat(val)||0;
+  if(prijs>0) sigPrijzen[merk+'_'+maat]=prijs;
+  else delete sigPrijzen[merk+'_'+maat];
+  await set(ref(db,'sigPrijzen'),sigPrijzen);
+};
+function renderSigMerkenList() {
+  const el=document.getElementById('sig-merken-list'); if(!el)return;
+  if(sigMerken.length===0){el.innerHTML='<p style="font-size:13px;color:var(--text-faint)">Nog geen merken.</p>';return;}
+  el.innerHTML=sigMerken.map((merk,i)=>`
+    <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="flex:1;font-weight:600;font-size:14px">${merk}</span>
+        <button class="btn sm danger" onclick="deleteSigMerk(${i})">🗑</button>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${MATEN.map(maat=>`
+          <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+            <span style="font-size:11px;color:var(--text-faint);font-weight:600">${maat}</span>
+            <div style="display:flex;align-items:center;gap:2px">
+              <span style="font-size:12px;color:var(--text-muted)">€</span>
+              <input type="number" min="0" step="0.01" placeholder="0.00"
+                value="${sigPrijzen[merk+'_'+maat]||''}"
+                onchange="saveSigPrijs('${merk}','${maat}',this.value)"
+                style="width:65px;padding:4px 6px;font-size:13px;text-align:center" />
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+// ── Sigaretten tabel ──────────────────────────────────────────────
+function renderSigTable(prefix='') {
+  const tbodyId = prefix ? 'edit-sig-tbody' : 'sig-tbody';
+  const tbody=document.getElementById(tbodyId); if(!tbody)return;
+  tbody.innerHTML=sigMerken.map(merk=>
+    MATEN.map(maat=>{
+      const prijs=sigPrijzen[merk+'_'+maat]||'';
+      const prijsLabel=prijs?`<span style="font-size:12px;color:var(--accent);font-weight:600">€${prijs}</span>`:`<span style="font-size:11px;color:var(--text-faint)">—</span>`;
+      return`<tr>
+        <td>${merk}</td>
+        <td><span style="font-weight:600">${maat}</span></td>
+        <td>${prijsLabel}</td>
+        <td><input type="number" min="0" value="${getSigQty(prefix,merk,maat)}" onchange="setSigQty('${prefix}','${merk}','${maat}',this.value)" style="width:60px;padding:5px 8px;text-align:center" /></td>
+      </tr>`;}).join('')
+  ).join('');
+}
+
+const sigQty={}, editSigQty={};
+function getSigQty(prefix,merk,maat){ return prefix?editSigQty[merk+'_'+maat]||0:sigQty[merk+'_'+maat]||0; }
+window.setSigQty = function(prefix,merk,maat,val){ if(prefix)editSigQty[merk+'_'+maat]=parseInt(val)||0; else sigQty[merk+'_'+maat]=parseInt(val)||0; };
+
+function getSigItems(qtyObj, customArr) {
+  const items=[];
+  sigMerken.forEach(merk=>MATEN.forEach(maat=>{
+    const qty=qtyObj[merk+'_'+maat]||0;
+    if(qty>0) items.push({cat:'sigaret',merk,maat,qty,naam:`${merk} ${maat}`});
+  }));
+  customArr.forEach(rid=>{
+    const naam=(document.getElementById(rid+'_naam')?.value||'').trim();
+    const maat=document.getElementById(rid+'_maat')?.value||'';
+    const qty=parseInt(document.getElementById(rid+'_qty')?.value||'0')||0;
+    if(naam&&qty>0) items.push({cat:'sigaret',naam:`${naam}${maat?' '+maat:''}`,merk:naam,maat,qty,custom:true});
+  });
+  return items;
+}
+
+// Sig custom
+window.addSigCustom = function(){ const rid='sc_'+Date.now(); sigCustomRows.push(rid); renderSigCustom(); };
+window.removeSigCustom = function(rid){ sigCustomRows=sigCustomRows.filter(r=>r!==rid); renderSigCustom(); };
+function renderSigCustom() {
+  const el=document.getElementById('sig-custom'); if(!el)return;
+  el.innerHTML=sigCustomRows.map(rid=>`
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:6px;padding:6px 0;border-bottom:1px solid var(--border);align-items:end">
+      <div><label style="font-size:11px">Merk</label><input type="text" id="${rid}_naam" placeholder="Merk" /></div>
+      <div><label style="font-size:11px">Maat</label><select id="${rid}_maat">${MATEN.map(m=>`<option>${m}</option>`).join('')}</select></div>
+      <div><label style="font-size:11px">Sloefen</label><input type="number" id="${rid}_qty" min="0" value="0" style="text-align:center" /></div>
+      <button class="btn sm danger" onclick="removeSigCustom('${rid}')" style="align-self:end">✕</button>
+    </div>`).join('');
+}
+
+// Edit sig custom
+window.addEditSigCustom = function(){ const rid='esc_'+Date.now(); editSigCustomRows.push({rid,naam:'',maat:'M',qty:0}); renderEditSigCustom(); };
+window.removeEditSigCustom = function(rid){ editSigCustomRows=editSigCustomRows.filter(r=>r.rid!==rid); renderEditSigCustom(); };
+function renderEditSigCustom() {
+  const el=document.getElementById('edit-sig-custom'); if(!el)return;
+  el.innerHTML=editSigCustomRows.map(r=>`
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:6px;padding:6px 0;border-bottom:1px solid var(--border);align-items:end">
+      <div><label style="font-size:11px">Merk</label><input type="text" id="${r.rid}_naam" value="${r.naam}" placeholder="Merk" /></div>
+      <div><label style="font-size:11px">Maat</label><select id="${r.rid}_maat">${MATEN.map(m=>`<option${m===r.maat?' selected':''}>${m}</option>`).join('')}</select></div>
+      <div><label style="font-size:11px">Sloefen</label><input type="number" id="${r.rid}_qty" min="0" value="${r.qty||0}" style="text-align:center" /></div>
+      <button class="btn sm danger" onclick="removeEditSigCustom('${r.rid}')" style="align-self:end">✕</button>
+    </div>`).join('');
+}
+
+// ── Alcohol ───────────────────────────────────────────────────────
+window.addAlcoholRow = function(){ const rid='al_'+Date.now(); alcoholRows.push(rid); renderAlcoholRows(); };
+window.removeAlcoholRow = function(rid){ alcoholRows=alcoholRows.filter(r=>r!==rid); renderAlcoholRows(); };
+function renderAlcoholRows() {
+  const el=document.getElementById('alcohol-rows'); if(!el)return;
+  if(alcoholRows.length===0){el.innerHTML='<div style="font-size:13px;color:var(--text-faint);padding:8px 0">Klik "+ Rij toevoegen" om alcohol toe te voegen.</div>';return;}
+  el.innerHTML=alcoholRows.map(rid=>`
+    <div class="free-row alcohol-row">
+      <div><label>Merk & soort</label><input type="text" id="${rid}_naam" placeholder="bv. Bacardi Rum" /></div>
+      <div><label>Liter</label><input type="text" id="${rid}_liter" placeholder="1L" /></div>
+      <div><label>Aantal</label><input type="number" id="${rid}_qty" min="1" value="1" /></div>
+      <div><label>Soort</label><select id="${rid}_soort">${ALCOHOL_SOORTEN.map(s=>`<option>${s}</option>`).join('')}</select></div>
+      <button class="btn sm danger" onclick="removeAlcoholRow('${rid}')" style="align-self:end;margin-bottom:1px">✕</button>
+    </div>`).join('');
+}
+window.addEditAlcoholRow = function(){ const rid='eal_'+Date.now(); editAlcoholRows.push({rid,naam:'',liter:'',qty:1,soort:'Whisky'}); renderEditAlcoholRows(); };
+window.removeEditAlcoholRow = function(rid){ editAlcoholRows=editAlcoholRows.filter(r=>r.rid!==rid); renderEditAlcoholRows(); };
+function renderEditAlcoholRows() {
+  const el=document.getElementById('edit-alcohol-rows'); if(!el)return;
+  if(editAlcoholRows.length===0){el.innerHTML='<div style="font-size:13px;color:var(--text-faint);padding:8px 0">Geen alcohol.</div>';return;}
+  el.innerHTML=editAlcoholRows.map(r=>`
+    <div class="free-row alcohol-row">
+      <div><label>Merk & soort</label><input type="text" id="${r.rid}_naam" value="${r.naam}" placeholder="bv. Bacardi Rum" /></div>
+      <div><label>Liter</label><input type="text" id="${r.rid}_liter" value="${r.liter}" placeholder="1L" /></div>
+      <div><label>Aantal</label><input type="number" id="${r.rid}_qty" min="1" value="${r.qty}" /></div>
+      <div><label>Soort</label><select id="${r.rid}_soort">${ALCOHOL_SOORTEN.map(s=>`<option${s===r.soort?' selected':''}>${s}</option>`).join('')}</select></div>
+      <button class="btn sm danger" onclick="removeEditAlcoholRow('${r.rid}')" style="align-self:end;margin-bottom:1px">✕</button>
+    </div>`).join('');
+}
+function getAlcoholItems(rows, prefix='') {
+  return rows.map(rid=>{
+    const isObj=typeof rid==='object';
+    const r=isObj?rid.rid:rid;
+    const naam=(document.getElementById(r+'_naam')?.value||'').trim();
+    const liter=(document.getElementById(r+'_liter')?.value||'').trim();
+    const qty=parseInt(document.getElementById(r+'_qty')?.value||'1')||1;
+    const soort=document.getElementById(r+'_soort')?.value||'';
+    if(!naam)return null;
+    return{cat:'alcohol',naam,liter,qty,soort};
+  }).filter(Boolean);
+}
+
+// ── Parfum ────────────────────────────────────────────────────────
+window.addParfumRow = function(){ const rid='pf_'+Date.now(); parfumRows.push(rid); renderParfumRows(); };
+window.removeParfumRow = function(rid){ parfumRows=parfumRows.filter(r=>r!==rid); renderParfumRows(); };
+function renderParfumRows() {
+  const el=document.getElementById('parfum-rows'); if(!el)return;
+  if(parfumRows.length===0){el.innerHTML='<div style="font-size:13px;color:var(--text-faint);padding:8px 0">Klik "+ Rij toevoegen" om parfum toe te voegen.</div>';return;}
+  el.innerHTML=parfumRows.map(rid=>`
+    <div class="free-row parfum-row">
+      <div><label>Merk & naam</label><input type="text" id="${rid}_naam" placeholder="bv. Chanel No.5" /></div>
+      <div><label>ml</label><input type="text" id="${rid}_ml" placeholder="100ml" /></div>
+      <div><label>Aantal</label><input type="number" id="${rid}_qty" min="1" value="1" /></div>
+      <button class="btn sm danger" onclick="removeParfumRow('${rid}')" style="align-self:end;margin-bottom:1px">✕</button>
+    </div>`).join('');
+}
+window.addEditParfumRow = function(){ const rid='epf_'+Date.now(); editParfumRows.push({rid,naam:'',ml:'',qty:1}); renderEditParfumRows(); };
+window.removeEditParfumRow = function(rid){ editParfumRows=editParfumRows.filter(r=>r.rid!==rid); renderEditParfumRows(); };
+function renderEditParfumRows() {
+  const el=document.getElementById('edit-parfum-rows'); if(!el)return;
+  if(editParfumRows.length===0){el.innerHTML='<div style="font-size:13px;color:var(--text-faint);padding:8px 0">Geen parfum.</div>';return;}
+  el.innerHTML=editParfumRows.map(r=>`
+    <div class="free-row parfum-row">
+      <div><label>Merk & naam</label><input type="text" id="${r.rid}_naam" value="${r.naam}" placeholder="bv. Chanel No.5" /></div>
+      <div><label>ml</label><input type="text" id="${r.rid}_ml" value="${r.ml}" placeholder="100ml" /></div>
+      <div><label>Aantal</label><input type="number" id="${r.rid}_qty" min="1" value="${r.qty}" /></div>
+      <button class="btn sm danger" onclick="removeEditParfumRow('${r.rid}')" style="align-self:end;margin-bottom:1px">✕</button>
+    </div>`).join('');
+}
+function getParfumItems(rows) {
+  return rows.map(rid=>{
+    const isObj=typeof rid==='object';
+    const r=isObj?rid.rid:rid;
+    const naam=(document.getElementById(r+'_naam')?.value||'').trim();
+    const ml=(document.getElementById(r+'_ml')?.value||'').trim();
+    const qty=parseInt(document.getElementById(r+'_qty')?.value||'1')||1;
+    if(!naam)return null;
+    return{cat:'parfum',naam,ml,qty};
+  }).filter(Boolean);
+}
+
+// ── Catalogus rendering ──────────────────────────────────────────
+const sigCart = {}; // key: naam_verpakking -> qty
+const alcCart = {}; // key: naam_verpakking -> qty
+
+function renderSigCatalog() {
+  const el = document.getElementById('sig-catalog-list'); if(!el) return;
+  const q = (document.getElementById('sig-search')?.value||'').toLowerCase();
+  const filtered = defaultSigCatalog.filter(p =>
+    p.naam.toLowerCase().includes(q) || p.verpakking.toLowerCase().includes(q)
+  );
+  if(filtered.length === 0){ el.innerHTML='<p style="font-size:13px;color:var(--text-faint)">Geen resultaten.</p>'; return; }
+  el.innerHTML = `<table class="sig-table" style="width:100%">
+    <thead><tr><th>Merk</th><th>Verpakking</th><th>Prijs</th><th>Sloefen</th></tr></thead>
+    <tbody>${filtered.map(p => {
+      const key = p.naam+'__'+p.verpakking;
+      return `<tr>
+        <td style="font-size:13px">${p.naam}</td>
+        <td style="font-size:13px">${p.verpakking}</td>
+        <td style="font-size:13px;color:var(--accent);font-weight:600">€${p.prijs.toFixed(2)}</td>
+        <td><div class="qty-ctrl">
+          <button class="qty-btn" onclick="changeSigCatalogQty('${key}',-1)">−</button>
+          <span class="qty-val" id="sigc-${key.replace(/[^a-zA-Z0-9]/g,'_')}">${sigCart[key]||0}</span>
+          <button class="qty-btn" onclick="changeSigCatalogQty('${key}',1)">+</button>
+        </div></td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+}
+
+window.changeSigCatalogQty = function(key, delta) {
+  sigCart[key] = Math.max(0, (sigCart[key]||0) + delta);
+  const id = 'sigc-'+key.replace(/[^a-zA-Z0-9]/g,'_');
+  const el = document.getElementById(id); if(el) el.textContent = sigCart[key];
+};
+
+function renderAlcCatalog() {
+  const el = document.getElementById('alc-catalog-list'); if(!el) return;
+  const q = (document.getElementById('alc-search')?.value||'').toLowerCase();
+  // Flatten all alcohol items
+  const allAlc = Object.entries(defaultAlcoholCatalog).flatMap(([soort, items]) =>
+    items.map(p => ({...p, soort}))
+  );
+  const filtered = allAlc.filter(p =>
+    p.naam.toLowerCase().includes(q) || p.soort.toLowerCase().includes(q)
+  );
+  if(filtered.length === 0){ el.innerHTML='<p style="font-size:13px;color:var(--text-faint)">Geen resultaten.</p>'; return; }
+  el.innerHTML = `<table class="sig-table" style="width:100%">
+    <thead><tr><th>Merk</th><th>Verpakking</th><th>Soort</th><th>Prijs</th><th>Aantal</th></tr></thead>
+    <tbody>${filtered.map(p => {
+      const key = p.naam+'__'+p.verpakking+'__'+p.soort;
+      return `<tr>
+        <td style="font-size:13px">${p.naam}</td>
+        <td style="font-size:13px">${p.verpakking}</td>
+        <td style="font-size:11px"><span class="cat-badge cat-alcohol">${p.soort}</span></td>
+        <td style="font-size:13px;color:var(--accent);font-weight:600">€${p.prijs.toFixed(2)}</td>
+        <td><div class="qty-ctrl">
+          <button class="qty-btn" onclick="changeAlcCatalogQty('${key}',-1)">−</button>
+          <span class="qty-val" id="alcc-${key.replace(/[^a-zA-Z0-9]/g,'_')}">${alcCart[key]||0}</span>
+          <button class="qty-btn" onclick="changeAlcCatalogQty('${key}',1)">+</button>
+        </div></td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+}
+
+window.changeAlcCatalogQty = function(key, delta) {
+  alcCart[key] = Math.max(0, (alcCart[key]||0) + delta);
+  const id = 'alcc-'+key.replace(/[^a-zA-Z0-9]/g,'_');
+  const el = document.getElementById(id); if(el) el.textContent = alcCart[key];
+};
+
+window.changeKoffieQty = function(key, delta) {
+  koffieCart[key] = Math.max(0, (koffieCart[key]||0) + delta);
+  const el = document.getElementById('kof-'+key.replace(/[^a-zA-Z0-9]/g,'_')); if(el) el.textContent = koffieCart[key];
+};
+window.changeSigarenQty = function(key, delta) {
+  sigarenCart[key] = Math.max(0, (sigarenCart[key]||0) + delta);
+  const el = document.getElementById('sig-'+key.replace(/[^a-zA-Z0-9]/g,'_')); if(el) el.textContent = sigarenCart[key];
+};
+
+const tabakCart = {};
+
+function renderTabakCatalog() {
+  const el = document.getElementById('tabak-catalog-list'); if(!el) return;
+  const q = (document.getElementById('tabak-search')?.value||'').toLowerCase();
+  const filtered = defaultTabakCatalog.filter(p => p.naam.toLowerCase().includes(q) || p.verpakking.toLowerCase().includes(q));
+  if(filtered.length === 0){ el.innerHTML='<p style="font-size:13px;color:var(--text-faint)">Geen resultaten.</p>'; return; }
+  el.innerHTML = `<table class="sig-table" style="width:100%">
+    <thead><tr><th>Merk</th><th>Verpakking</th><th>Prijs</th><th>Aantal</th></tr></thead>
+    <tbody>${filtered.map(p => {
+      const key = p.naam+'__'+p.verpakking;
+      return `<tr>
+        <td style="font-size:13px">${p.naam}</td>
+        <td style="font-size:13px">${p.verpakking}</td>
+        <td style="font-size:13px;color:var(--accent);font-weight:600">€${p.prijs.toFixed(2)}</td>
+        <td><div class="qty-ctrl">
+          <button class="qty-btn" onclick="changeTabakQty('${key}',-1)">−</button>
+          <span class="qty-val" id="tab-${key.replace(/[^a-zA-Z0-9]/g,'_')}">${tabakCart[key]||0}</span>
+          <button class="qty-btn" onclick="changeTabakQty('${key}',1)">+</button>
+        </div></td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+}
+window.changeTabakQty = function(key, delta) {
+  tabakCart[key] = Math.max(0, (tabakCart[key]||0) + delta);
+  const el = document.getElementById('tab-'+key.replace(/[^a-zA-Z0-9]/g,'_')); if(el) el.textContent = tabakCart[key];
+};
+
+// ── Bestelling indienen ───────────────────────────────────────────
+window.submitOrder = async function() {
+  const alertEl=document.getElementById('order-alert');
+  const trip=trips.find(t=>t.id===document.getElementById('trip-select').value);
+  if(!trip||trip.status!=='open'){showAlert(alertEl,'Deze trip is gesloten.','warning');return;}
+  // Catalogus sigaretten
+  const sigCatalogItems = defaultSigCatalog.filter(p=>(sigCart[p.naam+'__'+p.verpakking]||0)>0).map(p=>({
+    cat:'sigaret', naam:p.naam, verpakking:p.verpakking, qty:sigCart[p.naam+'__'+p.verpakking], prijs:p.prijs, custom:false
+  }));
+  const sigItems=[...sigCatalogItems, ...getSigItems(sigQty,sigCustomRows)];
+  // Catalogus alcohol
+  const allAlc = Object.entries(defaultAlcoholCatalog).flatMap(([soort,items])=>items.map(p=>({...p,soort})));
+  const alcCatalogItems = allAlc.filter(p=>(alcCart[p.naam+'__'+p.verpakking+'__'+p.soort]||0)>0).map(p=>({
+    cat:'alcohol', naam:p.naam, liter:p.verpakking, qty:alcCart[p.naam+'__'+p.verpakking+'__'+p.soort], prijs:p.prijs, soort:p.soort, custom:false
+  }));
+  const alcItems=[...alcCatalogItems, ...getAlcoholItems(alcoholRows)];
+  const pfItems=getParfumItems(parfumRows);
+  const koffieItems = defaultKoffieCatalog.filter(p=>(koffieCart[p.naam+'__'+p.verpakking]||0)>0).map(p=>({
+    cat:'koffie', naam:p.naam, verpakking:p.verpakking, qty:koffieCart[p.naam+'__'+p.verpakking], prijs:p.prijs
+  }));
+  const sigarenItems = defaultSigarenCatalog.filter(p=>(sigarenCart[p.naam+'__'+p.verpakking]||0)>0).map(p=>({
+    cat:'sigaar', naam:p.naam, verpakking:p.verpakking, qty:sigarenCart[p.naam+'__'+p.verpakking], prijs:p.prijs
+  }));
+  const tabakItems = defaultTabakCatalog.filter(p=>(tabakCart[p.naam+'__'+p.verpakking]||0)>0).map(p=>({
+    cat:'tabak', naam:p.naam, verpakking:p.verpakking, qty:tabakCart[p.naam+'__'+p.verpakking], prijs:p.prijs
+  }));
+  const items=[...sigItems,...alcItems,...pfItems,...koffieItems,...sigarenItems,...tabakItems];
+  if(items.length===0){showAlert(alertEl,'Voeg minstens één product toe.','info');return;}
+  const order={id:'o'+Date.now(),tripId:trip.id,naam:currentUser.naam,userId:currentUser.id,items,ts:new Date().toISOString()};
+  await push(ref(db,'orders'),order);
+  // reset
+  Object.keys(sigQty).forEach(k=>delete sigQty[k]);
+  Object.keys(sigCart).forEach(k=>delete sigCart[k]);
+  Object.keys(alcCart).forEach(k=>delete alcCart[k]);
+  sigCustomRows=[]; alcoholRows=[]; parfumRows=[];
+  renderSigCatalog(); renderAlcCatalog(); renderSigCustom(); renderAlcoholRows(); renderParfumRows();
+  showAlert(alertEl,`✅ Bestelling ingediend!`,'success');
+  window.scrollTo({top:0,behavior:'smooth'});
+};
+
+// ── Overzicht ─────────────────────────────────────────────────────
+function renderOverzicht() {
+  const sel=document.getElementById('overzicht-trip-select');
+  const trip=trips.find(t=>t.id===sel?.value)||trips[0];
+  const filtered=trip?orders.filter(o=>o.tripId===trip.id):[];
+  document.getElementById('stats-grid').innerHTML=`
+    <div class="stat-card"><div class="stat-val">${filtered.length}</div><div class="stat-lbl">Bestellingen</div></div>
+    <div class="stat-card"><div class="stat-val">${filtered.reduce((s,o)=>s+o.items.length,0)}</div><div class="stat-lbl">Producten</div></div>
+    <div class="stat-card"><div class="stat-val">${trip?(trip.status==='open'?'Open':'Gesloten'):'—'}</div><div class="stat-lbl">Status</div></div>`;
+  const list=document.getElementById('orders-list');
+  if(filtered.length===0){list.innerHTML='<div class="empty-state"><div class="icon">📭</div><p>Nog geen bestellingen.</p></div>';document.getElementById('totaal-summary').innerHTML='';return;}
+  list.innerHTML=filtered.map(o=>{
+    const isOwn=currentUser&&o.userId===currentUser.id;
+    return`<div class="order-card${isOwn?' mine':''}">
+      <div class="order-header">
+        <span class="order-person">👤 ${o.naam}${isOwn?' <span style="font-size:11px;color:var(--accent)">(jij)</span>':''}</span>
+        <span class="order-date">${new Date(o.ts).toLocaleDateString('nl-BE',{day:'2-digit',month:'short'})}</span>
+      </div>
+      ${o.items.map(i=>{
+        if(i.cat==='sigaret') return`<div class="order-item"><span><span class="cat-badge cat-sigaret">sigaret</span> ${i.naam}${i.verpakking?' · '+i.verpakking:''}</span><span style="font-weight:600">${i.qty} sloef${i.qty!==1?'en':''}${i.prijs?' · <span style=\"color:var(--accent)\">€'+(i.prijs*i.qty).toFixed(2)+'</span>':''}</span></div>`;
+        if(i.cat==='alcohol') return`<div class="order-item"><span><span class="cat-badge cat-alcohol">alcohol</span> ${i.naam}${i.liter?' · '+i.liter:''} · ${i.soort}</span><span style="font-weight:600">${i.qty}×${i.prijs?' · <span style=\"color:var(--accent)\">€'+(i.prijs*i.qty).toFixed(2)+'</span>':''}</span></div>`;
+        return`<div class="order-item"><span><span class="cat-badge cat-parfum">parfum</span> ${i.naam}${i.ml?' · '+i.ml:''}</span><span style="font-weight:600">${i.qty}×</span></div>`;
+      if(i.cat==='koffie') return`<div class="order-item"><span><span class="cat-badge" style="background:#f3f0e8;color:#5c4a2a">koffie</span> ${i.naam} · ${i.verpakking}</span><span style="font-weight:600">${i.qty}× · €${(i.prijs*i.qty).toFixed(2)}</span></div>`;
+      if(i.cat==='sigaar') return`<div class="order-item"><span><span class="cat-badge" style="background:#f0edf8;color:#4c1d95">sigaar</span> ${i.naam} · ${i.verpakking}</span><span style="font-weight:600">${i.qty}× · €${(i.prijs*i.qty).toFixed(2)}</span></div>`;
+      if(i.cat==='tabak') return`<div class="order-item"><span><span class="cat-badge" style="background:#fdf4e8;color:#7c4a10">tabak</span> ${i.naam} · ${i.verpakking}</span><span style="font-weight:600">${i.qty}× · €${(i.prijs*i.qty).toFixed(2)}</span></div>`;
+      }).join('')}
+      ${isOwn?`<div class="order-actions"><button class="btn sm primary" onclick="openEdit('${o._key}')">✏️ Bewerken</button><button class="btn sm danger" onclick="deleteOrder('${o._key}')">🗑 Verwijderen</button></div>`:''}
+    </div>`;
+  }).join('');
+
+  // Boodschappenlijst per categorie
+  const sig={}, alc=[], pf=[];
+  filtered.forEach(o=>o.items.forEach(i=>{
+    if(i.cat==='sigaret'){ const k=i.naam; sig[k]=(sig[k]||0)+i.qty; }
+    else if(i.cat==='alcohol') alc.push(`${i.naam}${i.liter?' '+i.liter:''} · ${i.soort} · ${i.qty}×`);
+    else pf.push(`${i.naam}${i.ml?' '+i.ml:''} · ${i.qty}×`);
+  }));
+  let html='<div class="card"><div class="card-title">🛍️ Boodschappenlijst</div>';
+  if(Object.keys(sig).length){ html+='<div style="font-weight:600;font-size:13px;margin-bottom:.25rem">🚬 Sigaretten</div><ul class="summary-list">'+Object.entries(sig).sort((a,b)=>b[1]-a[1]).map(([naam,qty])=>`<li><span><span class="cat-badge cat-sigaret">sigaret</span> ${naam}</span><span style="font-weight:700;color:var(--accent)">${qty} sloef${qty!==1?'en':''}</span></li>`).join('')+'</ul>'; }
+  if(alc.length){ html+='<div style="font-weight:600;font-size:13px;margin:.75rem 0 .25rem">🍾 Alcohol</div><ul class="summary-list">'+alc.map(s=>`<li><span class="cat-badge cat-alcohol">alcohol</span> ${s}</li>`).join('')+'</ul>'; }
+  if(pf.length){ html+='<div style="font-weight:600;font-size:13px;margin:.75rem 0 .25rem">🌸 Parfum</div><ul class="summary-list">'+pf.map(s=>`<li><span class="cat-badge cat-parfum">parfum</span> ${s}</li>`).join('')+'</ul>'; }
+  const kof={}, sigaren2={};
+  filtered.forEach(o=>o.items.forEach(i=>{
+    if(i.cat==='koffie'){ const k=i.naam+' '+i.verpakking; kof[k]=(kof[k]||0)+i.qty; }
+    if(i.cat==='sigaar'){ const k=i.naam+' '+i.verpakking; sigaren2[k]=(sigaren2[k]||0)+i.qty; }
+  }));
+  if(Object.keys(kof).length){ html+='<div style="font-weight:600;font-size:13px;margin:.75rem 0 .25rem">☕ Koffie</div><ul class="summary-list">'+Object.entries(kof).map(([n,q])=>`<li><span class="cat-badge" style="background:#f3f0e8;color:#5c4a2a">koffie</span> ${n} <span style="font-weight:700;color:var(--accent)">${q}×</span></li>`).join('')+'</ul>'; }
+  const tabak2={};
+  filtered.forEach(o=>o.items.forEach(i=>{
+    if(i.cat==='tabak'){ const k=i.naam+' '+i.verpakking; tabak2[k]=(tabak2[k]||0)+i.qty; }
+  }));
+  if(Object.keys(tabak2).length){ html+='<div style="font-weight:600;font-size:13px;margin:.75rem 0 .25rem">🍂 Tabak</div><ul class="summary-list">'+Object.entries(tabak2).map(([n,q])=>`<li><span class="cat-badge" style="background:#fdf4e8;color:#7c4a10">tabak</span> ${n} <span style="font-weight:700;color:var(--accent)">${q}×</span></li>`).join('')+'</ul>'; }
+  if(Object.keys(sigaren2).length){ html+='<div style="font-weight:600;font-size:13px;margin:.75rem 0 .25rem">🚿 Sigaren</div>🚿 Sigaren</div><ul class="summary-list">'+Object.entries(sigaren2).map(([n,q])=>`<li><span class="cat-badge" style="background:#f0edf8;color:#4c1d95">sigaar</span> ${n} <span style="font-weight:700;color:var(--accent)">${q}×</span></li>`).join('')+'</ul>'; }
+  html+='</div>';
+  document.getElementById('totaal-summary').innerHTML=html;
+}
+
+// ── Verwijderen ───────────────────────────────────────────────────
+window.deleteOrder = async function(key) {
+  if(!confirm('Bestelling verwijderen?'))return;
+  await remove(ref(db,'orders/'+key));
+};
+
+// ── Bewerken ──────────────────────────────────────────────────────
+window.openEdit = function(key) {
+  const order=orders.find(o=>o._key===key); if(!order)return;
+  editOrderKey=key;
+  Object.keys(editSigQty).forEach(k=>delete editSigQty[k]);
+  editSigCustomRows=[]; editAlcoholRows=[]; editParfumRows=[];
+  order.items.forEach(i=>{
+    if(i.cat==='sigaret'&&!i.custom) editSigQty[i.merk+'_'+i.maat]=i.qty;
+    else if(i.cat==='sigaret'&&i.custom) editSigCustomRows.push({rid:'esc_'+Date.now()+'_'+Math.random().toString(36).slice(2,5),naam:i.merk||i.naam,maat:i.maat||'M',qty:i.qty});
+    else if(i.cat==='alcohol') editAlcoholRows.push({rid:'eal_'+Date.now()+'_'+Math.random().toString(36).slice(2,5),naam:i.naam,liter:i.liter||'',qty:i.qty,soort:i.soort||'Whisky'});
+    else if(i.cat==='parfum') editParfumRows.push({rid:'epf_'+Date.now()+'_'+Math.random().toString(36).slice(2,5),naam:i.naam,ml:i.ml||'',qty:i.qty});
+  });
+  renderSigTable('edit'); renderEditSigCustom(); renderEditAlcoholRows(); renderEditParfumRows();
+  document.getElementById('edit-overlay').style.display='block';
+  document.body.style.overflow='hidden';
+};
+window.closeEdit = function() {
+  document.getElementById('edit-overlay').style.display='none';
+  document.body.style.overflow='';
+  editOrderKey=null;
+};
+window.saveEdit = async function() {
+  if(!editOrderKey)return;
+  const sigItems=getSigItems(editSigQty,editSigCustomRows.map(r=>r.rid));
+  const alcItems=getAlcoholItems(editAlcoholRows);
+  const pfItems=getParfumItems(editParfumRows);
+  const items=[...sigItems,...alcItems,...pfItems];
+  if(items.length===0){alert('Voeg minstens één product toe.');return;}
+  await update(ref(db,'orders/'+editOrderKey),{items,ts:new Date().toISOString()});
+  closeEdit();
+};
+
+// ── Beheer trips ──────────────────────────────────────────────────
+function renderBeheerTrips() {
+  const el=document.getElementById('trip-list-beheer'); if(!el)return;
+  if(trips.length===0){el.innerHTML='<p style="font-size:13px;color:var(--text-faint)">Nog geen trips.</p>';return;}
+  el.innerHTML=trips.map(t=>{
+    const cnt=orders.filter(o=>o.tripId===t.id).length;
+    return`<div class="trip-row"><div class="trip-info"><div class="trip-name">${t.naam}</div><div class="trip-meta">${t.datum?fmtDate(t.datum)+' · ':''}${cnt} bestelling${cnt!==1?'en':''}</div>${t.notitie?`<div class="trip-meta">📝 ${t.notitie}</div>`:''}</div><span class="badge ${t.status==='open'?'open':'closed'}">${t.status==='open'?'Open':'Gesloten'}</span><button class="btn sm" onclick="toggleTrip('${t.id}','${t._key}')">${t.status==='open'?'Sluiten':'Heropenen'}</button><button class="btn sm danger" onclick="deleteTrip('${t.id}','${t._key}')">🗑</button></div>`;
+  }).join('');
+}
+
+// ── Helpers ───────────────────────────────────────────────────────
+function showAlert(el,msg,type) {
+  el.className='alert '+type+' show'; el.textContent=msg;
+  clearTimeout(el._timer); el._timer=setTimeout(()=>el.classList.remove('show'),5000);
+}
+function renderAll() { renderTripSelects(); onTripSelect(); renderBeheerTrips(); renderUserList(); renderSigMerkenList(); renderOverzicht(); }
+
+await loadData();
+tryAutoLogin();
+</script>
+</body>
+</html>
