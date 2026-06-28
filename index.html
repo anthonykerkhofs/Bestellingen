@@ -171,7 +171,7 @@
       <div class="card">
         <div class="card-title">🚬 Sigaretten</div>
         <table class="sig-table">
-          <thead><tr><th>Merk</th><th>Maat</th><th>Sloefen</th></tr></thead>
+          <thead><tr><th>Merk</th><th>Maat</th><th>Prijs/sloef</th><th>Sloefen</th></tr></thead>
           <tbody id="sig-tbody"></tbody>
         </table>
         <div style="margin-top:.75rem;border-top:1px solid var(--border);padding-top:.75rem">
@@ -278,7 +278,8 @@
         </div>
       </div>
       <div class="card">
-        <div class="card-title">Merken</div>
+        <div class="card-title">Merken &amp; prijzen per maat</div>
+        <div style="font-size:12px;color:var(--text-faint);margin-bottom:.75rem">Vul de prijs per sloef in per merk en maat. Laat leeg als niet beschikbaar.</div>
         <div id="sig-merken-list"></div>
       </div>
       <div style="height:2rem"></div>
@@ -294,7 +295,7 @@
       <button class="btn sm" onclick="closeEdit()">✕</button>
     </div>
     <div class="card-title">🚬 Sigaretten</div>
-    <table class="sig-table"><thead><tr><th>Merk</th><th>Maat</th><th>Sloefen</th></tr></thead><tbody id="edit-sig-tbody"></tbody></table>
+    <table class="sig-table"><thead><tr><th>Merk</th><th>Maat</th><th>Prijs/sloef</th><th>Sloefen</th></tr></thead><tbody id="edit-sig-tbody"></tbody></table>
     <div style="margin-top:.75rem;border-top:1px solid var(--border);padding-top:.75rem">
       <div style="font-size:12px;color:var(--text-faint);margin-bottom:.5rem">Zelf toevoegen</div>
       <div id="edit-sig-custom"></div>
@@ -348,7 +349,7 @@ const defaultSigMerken = ['Marlboro','Winston','Lucky Strike','Camel','Philip Mo
 const MATEN = ['S','M','L','XL','XXL'];
 const ALCOHOL_SOORTEN = ['Whisky','Vodka','Rum','Gin','Cognac','Likeur','Wijn','Bier','Anders'];
 
-let trips=[], orders=[], users=[], sigMerken=[...defaultSigMerken];
+let trips=[], orders=[], users=[], sigMerken=[...defaultSigMerken], sigPrijzen={};
 let currentUser=null;
 let sigCustomRows=[], alcoholRows=[], parfumRows=[];
 let editOrderKey=null, editSigCustomRows=[], editAlcoholRows=[], editParfumRows=[];
@@ -359,14 +360,15 @@ const SESSION_KEY='lux2_user';
 // ── Firebase laden ────────────────────────────────────────────────
 async function loadData() {
   try {
-    const [t,o,u,s] = await Promise.all([
+    const [t,o,u,s,p] = await Promise.all([
       get(ref(db,'trips')), get(ref(db,'orders')),
-      get(ref(db,'users')), get(ref(db,'sigMerken'))
+      get(ref(db,'users')), get(ref(db,'sigMerken')), get(ref(db,'sigPrijzen'))
     ]);
     trips   = t.exists() ? Object.entries(t.val()).map(([k,v])=>({...v,_key:k})) : [];
     orders  = o.exists() ? Object.entries(o.val()).map(([k,v])=>({...v,_key:k})) : [];
     users   = u.exists() ? Object.entries(u.val()).map(([k,v])=>({...v,_key:k})) : [];
     sigMerken = s.exists() ? s.val() : [...defaultSigMerken];
+    sigPrijzen = p.exists() ? p.val() : {};
   } catch(e) { console.error(e); }
 }
 
@@ -374,6 +376,7 @@ onValue(ref(db,'trips'),   snap=>{ trips=snap.exists()?Object.entries(snap.val()
 onValue(ref(db,'orders'),  snap=>{ orders=snap.exists()?Object.entries(snap.val()).map(([k,v])=>({...v,_key:k})): []; renderOverzicht(); });
 onValue(ref(db,'users'),   snap=>{ users=snap.exists()?Object.entries(snap.val()).map(([k,v])=>({...v,_key:k})): []; renderUserList(); });
 onValue(ref(db,'sigMerken'),snap=>{ if(snap.exists()){ sigMerken=snap.val(); renderSigTable(); renderSigMerkenList(); } });
+onValue(ref(db,'sigPrijzen'),snap=>{ sigPrijzen=snap.exists()?snap.val():{}; renderSigTable(); renderSigMerkenList(); });
 
 // ── Login ─────────────────────────────────────────────────────────
 async function tryAutoLogin() {
@@ -530,9 +533,35 @@ window.deleteSigMerk = async function(idx) {
   const nieuw=sigMerken.filter((_,i)=>i!==idx);
   await set(ref(db,'sigMerken'),nieuw);
 };
+window.saveSigPrijs = async function(merk,maat,val) {
+  const prijs=parseFloat(val)||0;
+  if(prijs>0) sigPrijzen[merk+'_'+maat]=prijs;
+  else delete sigPrijzen[merk+'_'+maat];
+  await set(ref(db,'sigPrijzen'),sigPrijzen);
+};
 function renderSigMerkenList() {
   const el=document.getElementById('sig-merken-list'); if(!el)return;
-  el.innerHTML=sigMerken.map((m,i)=>`<div class="user-row"><span style="flex:1;font-size:14px">${m}</span><button class="btn sm danger" onclick="deleteSigMerk(${i})">🗑</button></div>`).join('');
+  if(sigMerken.length===0){el.innerHTML='<p style="font-size:13px;color:var(--text-faint)">Nog geen merken.</p>';return;}
+  el.innerHTML=sigMerken.map((merk,i)=>`
+    <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="flex:1;font-weight:600;font-size:14px">${merk}</span>
+        <button class="btn sm danger" onclick="deleteSigMerk(${i})">🗑</button>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${MATEN.map(maat=>`
+          <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+            <span style="font-size:11px;color:var(--text-faint);font-weight:600">${maat}</span>
+            <div style="display:flex;align-items:center;gap:2px">
+              <span style="font-size:12px;color:var(--text-muted)">€</span>
+              <input type="number" min="0" step="0.01" placeholder="0.00"
+                value="${sigPrijzen[merk+'_'+maat]||''}"
+                onchange="saveSigPrijs('${merk}','${maat}',this.value)"
+                style="width:65px;padding:4px 6px;font-size:13px;text-align:center" />
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
 }
 
 // ── Sigaretten tabel ──────────────────────────────────────────────
@@ -540,12 +569,15 @@ function renderSigTable(prefix='') {
   const tbodyId = prefix ? 'edit-sig-tbody' : 'sig-tbody';
   const tbody=document.getElementById(tbodyId); if(!tbody)return;
   tbody.innerHTML=sigMerken.map(merk=>
-    MATEN.map(maat=>`
-      <tr>
+    MATEN.map(maat=>{
+      const prijs=sigPrijzen[merk+'_'+maat]||'';
+      const prijsLabel=prijs?`<span style="font-size:12px;color:var(--accent);font-weight:600">€${prijs}</span>`:`<span style="font-size:11px;color:var(--text-faint)">—</span>`;
+      return`<tr>
         <td>${merk}</td>
         <td><span style="font-weight:600">${maat}</span></td>
+        <td>${prijsLabel}</td>
         <td><input type="number" min="0" value="${getSigQty(prefix,merk,maat)}" onchange="setSigQty('${prefix}','${merk}','${maat}',this.value)" style="width:60px;padding:5px 8px;text-align:center" /></td>
-      </tr>`).join('')
+      </tr>`;}).join('')
   ).join('');
 }
 
