@@ -667,7 +667,7 @@ let currentUser=null;
 let sigCustomRows=[], alcoholRows=[], parfumRows=[];
 let editOrderKey=null, editSigCustomRows=[], editAlcoholRows=[], editParfumRows=[];
 
-const ADMIN_PW='luxemburg2026', ADMIN_KEY='lux2_admin';
+const ADMIN_PW='06121991', ADMIN_KEY='lux2_admin';
 const SESSION_KEY='lux2_user';
 
 // ── Firebase laden ────────────────────────────────────────────────
@@ -700,11 +700,18 @@ async function tryAutoLogin() {
     return;
   }
   await loadData();
-  // Admin kan loginscherm overslaan via ?admin
+  // Admin via ?admin: toon wachtwoordprompt
   if(window.location.search.includes('admin')) {
-    currentUser = { naam: 'Admin', id: 'admin' };
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
-    showApp();
+    const pw = prompt('🔒 Admin wachtwoord:');
+    if(pw === '06121991') {
+      currentUser = { naam: 'Admin', id: 'admin' };
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+      sessionStorage.setItem(ADMIN_KEY, '1');
+      showApp();
+    } else {
+      alert('Fout wachtwoord.');
+      window.location.href = window.location.pathname;
+    }
     return;
   }
   document.getElementById('login-screen').style.display='block';
@@ -728,7 +735,10 @@ function showApp() {
   document.getElementById('main-app').style.display='block';
   document.getElementById('header-user').textContent=`👤 ${currentUser.naam} · Afmelden`;
   renderAll();
-  if(window.location.search.includes('admin')){ sessionStorage.setItem(ADMIN_KEY,'1'); document.getElementById('tab-beheer-btn').style.display=''; showTab('beheer'); showAdminContent(); }
+  if(sessionStorage.getItem(ADMIN_KEY)==='1') {
+    document.getElementById('tab-beheer-btn').style.display='';
+    if(window.location.search.includes('admin')) { showTab('beheer'); showAdminContent(); }
+  }
 }
 
 window.doLogout = function() {
