@@ -384,6 +384,13 @@ async function tryAutoLogin() {
     return;
   }
   await loadData();
+  // Admin kan loginscherm overslaan via ?admin
+  if(window.location.search.includes('admin')) {
+    currentUser = { naam: 'Admin', id: 'admin' };
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+    showApp();
+    return;
+  }
   document.getElementById('login-screen').style.display='block';
 }
 
