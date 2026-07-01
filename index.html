@@ -117,6 +117,7 @@
   <div class="tab-bar">
     <button class="tab-btn active" onclick="showTab('bestellen')">🛒 Bestellen</button>
     <button class="tab-btn" onclick="showTab('overzicht')">📋 Overzicht</button>
+    <button class="tab-btn" onclick="showTab('betaling')">💳 Betaling</button>
     <button class="tab-btn" id="tab-beheer-btn" onclick="showTab('beheer')" style="display:none">⚙️ Beheer</button>
   </div>
 
@@ -186,6 +187,26 @@
     <div id="totaal-summary"></div>
   </div>
 
+  <div id="page-betaling" class="page">
+    <div class="card" style="background:linear-gradient(135deg,var(--accent),#5b21b6);color:#fff;border:none">
+      <div style="font-size:28px;margin-bottom:.5rem">💳</div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:.25rem">Betaling</div>
+      <div style="font-size:13px;opacity:.85">Overzicht van jouw bestelling en totaal te betalen bedrag</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏦 Rekeningnummer</div>
+      <div id="betaling-rekeningnummer" style="font-size:16px;font-weight:600;letter-spacing:.05em;padding:.5rem 0;color:var(--accent)">—</div>
+      <div style="font-size:12px;color:var(--text-faint)" id="betaling-naam-rekening"></div>
+    </div>
+
+    <div class="section-head">
+      <h2>Jouw bestelling</h2>
+      <select id="betaling-trip-select" onchange="renderBetaling()" style="width:auto;font-size:13px;padding:5px 8px"></select>
+    </div>
+    <div id="betaling-content"></div>
+  </div>
+
   <div id="page-beheer" class="page">
     <div id="beheer-lock" class="card" style="margin-top:2rem;max-width:320px;margin-left:auto;margin-right:auto;text-align:center">
       <div style="font-size:32px;margin-bottom:.5rem">🔒</div>
@@ -218,6 +239,14 @@
         </div>
       </div>
       <div class="card"><div class="card-title">Gebruikers</div><div id="user-list"></div></div>
+      <h2 style="font-size:16px;font-weight:600;margin:.75rem 0">Betaalinformatie</h2>
+      <div class="card">
+        <div class="card-title">Rekeningnummer instellen</div>
+        <div class="field"><label>IBAN rekeningnummer</label><input type="text" id="iban-input" placeholder="bv. BE68 5390 0754 7034" /></div>
+        <div class="field"><label>Naam rekeninghouder</label><input type="text" id="iban-naam-input" placeholder="bv. Anthony Kerkhofs" /></div>
+        <div class="btn-row"><button class="btn primary" onclick="saveIban()">💾 Opslaan</button></div>
+        <div id="iban-saved" class="alert success" style="margin-top:.5rem"></div>
+      </div>
       <div style="height:2rem"></div>
     </div>
   </div>
@@ -338,6 +367,17 @@ async function loadData() {
 onValue(ref(db,'trips'),  snap=>{trips =snap.exists()?Object.entries(snap.val()).map(([k,v])=>({...v,_key:k})):[];renderTripSelects();renderBeheerTrips();renderOverzicht();});
 onValue(ref(db,'orders'), snap=>{orders=snap.exists()?Object.entries(snap.val()).map(([k,v])=>({...v,_key:k})):[];renderOverzicht();});
 onValue(ref(db,'users'),  snap=>{users =snap.exists()?Object.entries(snap.val()).map(([k,v])=>({...v,_key:k})):[];renderUserList();});
+onValue(ref(db,'iban'), snap=>{
+  const data = snap.exists()?snap.val():{};
+  const el1 = document.getElementById('betaling-rekeningnummer');
+  const el2 = document.getElementById('betaling-naam-rekening');
+  const inp1 = document.getElementById('iban-input');
+  const inp2 = document.getElementById('iban-naam-input');
+  if(el1) el1.textContent = data.iban || '— nog niet ingesteld —';
+  if(el2) el2.textContent = data.naam || '';
+  if(inp1) inp1.value = data.iban || '';
+  if(inp2) inp2.value = data.naam || '';
+});
 
 // ── Login ─────────────────────────────────────────────────────────
 async function tryAutoLogin() {
@@ -419,6 +459,7 @@ window.showTab = function(name) {
   document.querySelector(`[onclick="showTab('${name}')"]`).classList.add('active');
   document.getElementById('page-'+name).classList.add('active');
   if(name==='overzicht') renderOverzicht();
+  if(name==='betaling') renderBetaling();
   if(name==='beheer'&&sessionStorage.getItem(ADMIN_KEY)==='1') showAdminContent();
 };
 
@@ -718,7 +759,108 @@ function renderBeheerTrips() {
 
 // ── Helpers ───────────────────────────────────────────────────────
 function showAlert(el,msg,type){ el.className='alert '+type+' show'; el.textContent=msg; clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),5000); }
-function renderAll(){ renderTripSelects(); onTripSelect(); renderBeheerTrips(); renderUserList(); renderOverzicht(); }
+function renderAll(){ renderTripSelects(); onTripSelect(); renderBeheerTrips(); renderUserList(); renderOverzicht(); renderBetaling(); }
+
+window.saveIban = async function() {
+  const iban = document.getElementById('iban-input').value.trim();
+  const naam = document.getElementById('iban-naam-input').value.trim();
+  if(!iban) return;
+  await set(ref(db,'iban'), {iban, naam});
+  const el = document.getElementById('iban-saved');
+  showAlert(el, '✅ Rekeningnummer opgeslagen!', 'success');
+};
+
+function renderBetaling() {
+  // Sync trip selects
+  const betalingTripSel = document.getElementById('betaling-trip-select');
+  if(betalingTripSel) {
+    betalingTripSel.innerHTML = trips.length===0
+      ? '<option value="">— nog geen trips —</option>'
+      : trips.map(t=>`<option value="${t.id}">${t.naam}${t.datum?' · '+fmtDate(t.datum):''}</option>`).join('');
+  }
+
+  const el = document.getElementById('betaling-content'); if(!el) return;
+  if(!currentUser){ el.innerHTML=''; return; }
+
+  const tripId = betalingTripSel?.value;
+  const trip = trips.find(t=>t.id===tripId) || trips[0];
+  if(!trip){ el.innerHTML='<div class="empty-state"><div class="icon">📭</div><p>Geen actieve trip.</p></div>'; return; }
+
+  const myOrders = orders.filter(o=>o.tripId===trip.id && o.userId===currentUser.id);
+  if(!myOrders.length){
+    el.innerHTML='<div class="card"><div class="empty-state"><div class="icon">🛒</div><p>Je hebt nog geen bestelling ingediend voor deze trip.</p></div></div>';
+    return;
+  }
+
+  // Flatten all items across orders
+  const allItems = myOrders.flatMap(o=>o.items);
+  let totaal = 0;
+
+  const catLabels = {sigaret:'🚬',tabak:'🍂',alcohol:'🍾',parfum:'🌸',koffie:'☕',sigaar:'🚿'};
+  const catNames = {sigaret:'Sigaretten',tabak:'Tabak',alcohol:'Alcohol',parfum:'Parfum',koffie:'Koffiebonen',sigaar:'Sigaren'};
+  const cats = ['sigaret','tabak','alcohol','koffie','sigaar','parfum'];
+
+  let html = '';
+  cats.forEach(cat => {
+    const items = allItems.filter(i=>i.cat===cat);
+    if(!items.length) return;
+    html += `<div class="card">
+      <div class="card-title">${catLabels[cat]||''} ${catNames[cat]||cat}</div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr>
+          <th style="text-align:left;font-size:11px;color:var(--text-faint);padding:4px;border-bottom:1px solid var(--border)">Product</th>
+          <th style="text-align:center;font-size:11px;color:var(--text-faint);padding:4px;border-bottom:1px solid var(--border)">Aantal</th>
+          <th style="text-align:right;font-size:11px;color:var(--text-faint);padding:4px;border-bottom:1px solid var(--border)">Prijs/stuk</th>
+          <th style="text-align:right;font-size:11px;color:var(--text-faint);padding:4px;border-bottom:1px solid var(--border)">Totaal</th>
+        </tr></thead>
+        <tbody>`;
+    items.forEach(i => {
+      const naam = i.naam + (i.verpakking?' · '+i.verpakking:i.liter?' · '+i.liter:i.ml?' · '+i.ml:'');
+      const eenheid = cat==='sigaret'?`${i.qty} sloef${i.qty!==1?'en':''}`:i.qty+'×';
+      const prijsStuk = i.prijs ? `€${i.prijs.toFixed(2)}` : '—';
+      const prijsTotaal = i.prijs ? i.prijs * i.qty : null;
+      if(prijsTotaal) totaal += prijsTotaal;
+      html += `<tr>
+        <td style="padding:6px 4px;border-bottom:1px solid var(--border)">${naam}</td>
+        <td style="padding:6px 4px;border-bottom:1px solid var(--border);text-align:center">${eenheid}</td>
+        <td style="padding:6px 4px;border-bottom:1px solid var(--border);text-align:right;color:var(--text-muted)">${prijsStuk}</td>
+        <td style="padding:6px 4px;border-bottom:1px solid var(--border);text-align:right;font-weight:600;color:var(--accent)">${prijsTotaal?'€'+prijsTotaal.toFixed(2):'—'}</td>
+      </tr>`;
+    });
+    html += `</tbody></table></div>`;
+  });
+
+  // Totaal
+  html += `<div class="card" style="background:var(--accent);color:#fff;border:none">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:13px;opacity:.8">Totaal te betalen</div>
+        <div style="font-size:11px;opacity:.7;margin-top:2px">Producten zonder prijs niet meegerekend</div>
+      </div>
+      <div style="font-size:28px;font-weight:700">€${totaal.toFixed(2)}</div>
+    </div>
+  </div>`;
+
+  // Betaalinstructie
+  const ibanEl = document.getElementById('betaling-rekeningnummer');
+  const iban = ibanEl?.textContent;
+  if(iban && iban !== '—' && iban !== '— nog niet ingesteld —') {
+    html += `<div class="card" style="border-color:var(--accent)">
+      <div class="card-title">📋 Betaalinstructie</div>
+      <div style="font-size:14px;margin-bottom:.5rem">Maak <strong>€${totaal.toFixed(2)}</strong> over naar:</div>
+      <div style="font-size:16px;font-weight:700;color:var(--accent);letter-spacing:.05em;margin-bottom:.25rem">${iban}</div>
+      <div style="font-size:13px;color:var(--text-muted)" id="betaling-naam-op-pagina"></div>
+      <div style="font-size:12px;color:var(--text-faint);margin-top:.5rem">Mededeling: <strong>${currentUser.naam} · ${trip.naam}</strong></div>
+    </div>`;
+  }
+
+  el.innerHTML = html;
+
+  // Fill in naam
+  const naamEl = document.getElementById('betaling-naam-rekening');
+  const naamOpPagina = document.getElementById('betaling-naam-op-pagina');
+  if(naamEl && naamOpPagina) naamOpPagina.textContent = naamEl.textContent;
+}
 
 await loadData();
 tryAutoLogin();
